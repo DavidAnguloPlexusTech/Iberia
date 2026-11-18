@@ -7,9 +7,12 @@ import org.koin.test.verify.verify
 
 class AppModulesTest {
 
+    /** Types provided at runtime as ViewModel parameters. */
+    private val extraTypes = listOf(String::class)
+
     @OptIn(KoinExperimentalAPI::class)
     @Test
     fun `all dependencies can be resolved`() {
-        module { includes(appModules) }.verify()
+        module { includes(appModules) }.verify(extraTypes = extraTypes)
     }
 }

@@ -3,7 +3,7 @@ package com.plexus.iberia.data
 import com.plexus.iberia.data.network.provideRetrofit
 import com.plexus.iberia.data.remote.api.NasaApi
 import okhttp3.OkHttpClient
-import okhttp3.mockwebserver.MockWebServer
+import mockwebserver3.MockWebServer
 import retrofit2.create
 
 internal fun readResource(name: String): String =

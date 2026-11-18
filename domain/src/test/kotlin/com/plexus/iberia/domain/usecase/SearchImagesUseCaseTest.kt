@@ -1,5 +1,6 @@
 package com.plexus.iberia.domain.usecase
 
+import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.model.SearchPage
 import com.plexus.iberia.domain.repository.NasaImageRepository
 import kotlinx.coroutines.flow.Flow
@@ -44,6 +45,8 @@ class SearchImagesUseCaseTest {
             lastPage = page
             return flowOf(Result.success(PAGE))
         }
+
+        override fun getImage(id: String): Flow<Result<NasaImage>> = error("Not used")
 
         companion object {
             val PAGE = SearchPage(images = emptyList(), hasNextPage = false)

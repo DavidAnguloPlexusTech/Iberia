@@ -2,6 +2,8 @@ package com.plexus.iberia.data.mapper
 
 import com.plexus.iberia.data.remote.dto.PageLinkDto
 import com.plexus.iberia.data.remote.dto.SearchResponseDto
+import com.plexus.iberia.domain.error.DomainError
+import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.model.SearchPage
 
 private const val REL_NEXT = "next"
@@ -12,3 +14,7 @@ internal fun SearchResponseDto.toSearchPage(): SearchPage = SearchPage(
 )
 
 private fun List<PageLinkDto>.hasNext(): Boolean = any { it.rel == REL_NEXT }
+
+/** Throws [DomainError.NotFound] when the response has no valid image. */
+internal fun SearchResponseDto.firstImage(): NasaImage =
+    toSearchPage().images.firstOrNull() ?: throw DomainError.NotFound

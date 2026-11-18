@@ -9,6 +9,9 @@ sealed class DomainError : Exception() {
     /** The server answered with an error status. */
     data class Server(val code: Int) : DomainError()
 
+    /** The requested item does not exist. */
+    data object NotFound : DomainError()
+
     /** Anything not covered above, such as an unreadable response. */
     data object Unknown : DomainError()
 }

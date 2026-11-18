@@ -7,9 +7,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.plexus.iberia.ui.detail.DetailScreen
-import com.plexus.iberia.ui.home.HomeScreen
-import com.plexus.iberia.ui.splash.SplashScreen
+import androidx.navigation.toRoute
+import com.plexus.iberia.ui.detail.DetailRoute
+import com.plexus.iberia.ui.home.HomeRoute
+import com.plexus.iberia.ui.splash.SplashRoute
 
 @Composable
 internal fun IberiaNavHost(
@@ -18,23 +19,25 @@ internal fun IberiaNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Destination.Splash,
+        startDestination = Routes.Splash,
         modifier = modifier,
     ) {
-        splashDestination(onFinished = navController::navigateToHome)
-        homeDestination()
-        detailDestination()
+        splashDestination(onNavigateToHome = navController::navigateToHome)
+        homeDestination(onNavigateToDetail = navController::navigateToDetail)
+        detailDestination(onNavigateBack = { navController.popBackStack() })
     }
 }
 
-private fun NavGraphBuilder.splashDestination(onFinished: () -> Unit) {
-    composable<Destination.Splash> { SplashScreen(onFinished = onFinished) }
+private fun NavGraphBuilder.splashDestination(onNavigateToHome: () -> Unit) {
+    composable<Routes.Splash> { SplashRoute(onNavigateToHome = onNavigateToHome) }
 }
 
-private fun NavGraphBuilder.homeDestination() {
-    composable<Destination.Home> { HomeScreen() }
+private fun NavGraphBuilder.homeDestination(onNavigateToDetail: (String) -> Unit) {
+    composable<Routes.Home> { HomeRoute(onNavigateToDetail = onNavigateToDetail) }
 }
 
-private fun NavGraphBuilder.detailDestination() {
-    composable<Destination.Detail> { DetailScreen() }
+private fun NavGraphBuilder.detailDestination(onNavigateBack: () -> Unit) {
+    composable<Routes.Detail> { entry ->
+        DetailRoute(nasaId = entry.toRoute<Routes.Detail>().nasaId, onNavigateBack = onNavigateBack)
+    }
 }
