@@ -1,17 +1,30 @@
 package com.plexus.iberia.ui.home
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.plexus.iberia.ui.R
-import com.plexus.iberia.ui.common.ScreenPlaceholder
+import com.plexus.iberia.ui.common.PreviewData
+import com.plexus.iberia.ui.common.components.EmptyMessage
+import com.plexus.iberia.ui.common.components.ErrorMessage
+import com.plexus.iberia.ui.common.components.LoadingAnimation
+import com.plexus.iberia.ui.common.toMessage
+import com.plexus.iberia.ui.home.components.ImageList
+import com.plexus.iberia.ui.home.components.SearchBar
 import com.plexus.iberia.ui.theme.IberiaTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,7 +37,6 @@ internal fun HomeRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
-    // Events are collected only while visible; Main.immediate handles them in the same frame.
     LaunchedEffect(viewModel, lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             withContext(Dispatchers.Main.immediate) {
@@ -45,7 +57,6 @@ internal fun HomeRoute(
     )
 }
 
-/** Stateless: renders [state] and reports user actions through the callbacks. */
 @Composable
 internal fun HomeScreen(
     state: HomeState,
@@ -55,19 +66,73 @@ internal fun HomeScreen(
     onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ScreenPlaceholder(title = stringResource(R.string.home_title), modifier = modifier)
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            SearchBar(
+                query = state.query,
+                onQueryChange = onQueryChange,
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+        },
+    ) { innerPadding ->
+        HomeContent(
+            state = state,
+            onLoadNextPage = onLoadNextPage,
+            onRetry = onRetry,
+            onImageClick = onImageClick,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+        )
+    }
+}
+
+@Composable
+private fun HomeContent(
+    state: HomeState,
+    onLoadNextPage: () -> Unit,
+    onRetry: () -> Unit,
+    onImageClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        when {
+            state.isLoading -> LoadingAnimation()
+            state.images.isNotEmpty() -> ImageList(
+                images = state.images,
+                isLoadingNextPage = state.isLoadingNextPage,
+                error = state.error,
+                onImageClick = onImageClick,
+                onLoadNextPage = onLoadNextPage,
+                onRetry = onRetry,
+                modifier = Modifier.fillMaxSize(),
+            )
+            state.error != null -> ErrorMessage(message = state.error.toMessage(), onRetry = onRetry)
+            state.query.isBlank() -> EmptyMessage(
+                title = stringResource(R.string.home_empty_title),
+                message = stringResource(R.string.home_empty_message),
+            )
+            else -> EmptyMessage(message = stringResource(R.string.home_no_results, state.query.trim()))
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun HomeScreenPreview() {
-    IberiaTheme {
-        HomeScreen(
-            state = HomeState(),
-            onQueryChange = {},
-            onLoadNextPage = {},
-            onRetry = {},
-            onImageClick = {},
-        )
-    }
+private fun HomeScreenEmptyPreview() {
+    IberiaTheme { HomeScreenPreview(state = HomeState()) }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenResultsPreview() {
+    IberiaTheme { HomeScreenPreview(state = HomeState(query = "aircraft", images = PreviewData.images)) }
+}
+
+@Composable
+private fun HomeScreenPreview(state: HomeState) {
+    HomeScreen(state = state, onQueryChange = {}, onLoadNextPage = {}, onRetry = {}, onImageClick = {})
 }

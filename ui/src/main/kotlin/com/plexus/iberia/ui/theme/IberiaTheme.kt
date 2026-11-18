@@ -7,15 +7,53 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
-private val LightColors = lightColorScheme(primary = Purple40, secondary = PurpleGrey40)
-private val DarkColors = darkColorScheme(primary = Purple80, secondary = PurpleGrey80)
+private val LightColors = lightColorScheme(
+    primary = AtomicOrange,
+    onPrimary = Cream,
+    secondary = Teal,
+    onSecondary = Cream,
+    tertiary = Mustard,
+    onTertiary = Ink,
+    background = Cream,
+    onBackground = Ink,
+    surface = Cream,
+    onSurface = Ink,
+    surfaceVariant = CreamDark,
+    onSurfaceVariant = InkSoft,
+    surfaceContainerHighest = CreamDark,
+    outline = Ink,
+    outlineVariant = InkDivider,
+)
+
+private val DarkColors = darkColorScheme(
+    primary = AtomicOrangeLight,
+    onPrimary = NightBlue,
+    secondary = TealLight,
+    onSecondary = NightBlue,
+    tertiary = MustardLight,
+    onTertiary = NightBlue,
+    background = NightBlue,
+    onBackground = Cream,
+    surface = NightBlue,
+    onSurface = Cream,
+    surfaceVariant = NightBlueLight,
+    onSurfaceVariant = CreamSoft,
+    surfaceContainerHighest = NightBlueLight,
+    outline = CreamSoft,
+    outlineVariant = CreamDivider,
+)
 
 @Composable
 fun IberiaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(colorScheme = colorSchemeFor(darkTheme), content = content)
+    MaterialTheme(
+        colorScheme = colorSchemeFor(darkTheme),
+        typography = IberiaTypography,
+        shapes = IberiaShapes,
+        content = content,
+    )
 }
 
 private fun colorSchemeFor(darkTheme: Boolean): ColorScheme =

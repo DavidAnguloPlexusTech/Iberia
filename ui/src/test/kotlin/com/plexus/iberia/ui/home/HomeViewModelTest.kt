@@ -2,6 +2,7 @@ package com.plexus.iberia.ui.home
 
 import app.cash.turbine.test
 import com.plexus.iberia.domain.error.DomainError
+import com.plexus.iberia.domain.usecase.GetRandomImagesUseCase
 import com.plexus.iberia.domain.usecase.SearchImagesUseCase
 import com.plexus.iberia.ui.FakeNasaImageRepository
 import com.plexus.iberia.ui.MainDispatcherRule
@@ -14,9 +15,11 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -27,7 +30,9 @@ class HomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = FakeNasaImageRepository()
-    private val viewModel by lazy { HomeViewModel(SearchImagesUseCase(repository)) }
+    private val viewModel by lazy {
+        HomeViewModel(SearchImagesUseCase(repository), GetRandomImagesUseCase(repository, Random(0)))
+    }
 
     @Test
     fun `searches the trimmed query after the debounce`() = runTest {
@@ -76,12 +81,8 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `clears the results when the query is blank`() = runTest {
-        searchFor("apollo")
-        viewModel.onQueryChange("   ")
-        advanceUntilIdle()
-
-        assertTrue(viewModel.state.value.images.isEmpty())
+    fun `starts loading`() = runTest {
+        assertTrue(viewModel.state.value.isLoading)
     }
 
     @Test
@@ -127,6 +128,53 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(2, viewModel.state.value.page)
+    }
+
+    @Test
+    fun `shows the first page of a random feed without a query`() = runTest {
+        viewModel
+        advanceUntilIdle()
+
+        val (topic, page) = repository.searches.single()
+        assertTrue(topic in GetRandomImagesUseCase.TOPICS)
+        assertEquals(searchPage(page).images, viewModel.state.value.images)
+    }
+
+    @Test
+    fun `loads the next random page from another topic when scrolling`() = runTest {
+        viewModel
+        advanceUntilIdle()
+        viewModel.loadNextPage()
+        advanceUntilIdle()
+
+        val (firstTopic, firstPage) = repository.searches[0]
+        val (secondTopic, secondPage) = repository.searches[1]
+        assertNotEquals(firstTopic, secondTopic)
+        assertEquals(firstPage, secondPage)
+        assertEquals(2, repository.searches.size)
+    }
+
+    @Test
+    fun `shows a random feed again when the query is cleared`() = runTest {
+        searchFor("apollo")
+        viewModel.onQueryChange("   ")
+        advanceUntilIdle()
+
+        assertTrue(repository.searches.last().first in GetRandomImagesUseCase.TOPICS)
+    }
+
+    @Test
+    fun `retry repeats the failed random page`() = runTest {
+        repository.searchResults = { Result.failure(DomainError.Network) }
+        viewModel
+        advanceUntilIdle()
+        assertEquals(DomainError.Network, viewModel.state.value.error)
+        repository.searchResults = { Result.success(searchPage(it)) }
+        viewModel.retry()
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.state.value.error)
+        assertTrue(viewModel.state.value.images.isNotEmpty())
     }
 
     @Test
