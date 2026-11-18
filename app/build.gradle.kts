@@ -44,7 +44,12 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.android)
+
     testImplementation(libs.junit)
+    testImplementation(libs.koin.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 }
