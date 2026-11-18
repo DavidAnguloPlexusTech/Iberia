@@ -14,6 +14,12 @@ internal interface NasaApi {
         @Query("media_type") mediaType: String = MEDIA_TYPE_IMAGE,
     ): SearchResponseDto
 
+    @GET("search")
+    suspend fun getImage(
+        @Query("nasa_id") nasaId: String,
+        @Query("media_type") mediaType: String = MEDIA_TYPE_IMAGE,
+    ): SearchResponseDto
+
     companion object {
         const val MEDIA_TYPE_IMAGE = "image"
     }

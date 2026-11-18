@@ -3,14 +3,14 @@ package com.plexus.iberia.data.network
 import com.plexus.iberia.data.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
-private const val TIMEOUT_SECONDS = 15L
+private val TIMEOUT = 15.seconds
 
 internal fun provideOkHttpClient(): OkHttpClient =
     OkHttpClient.Builder()
-        .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .connectTimeout(TIMEOUT)
+        .readTimeout(TIMEOUT)
         .addInterceptor(provideLoggingInterceptor())
         .build()
 
