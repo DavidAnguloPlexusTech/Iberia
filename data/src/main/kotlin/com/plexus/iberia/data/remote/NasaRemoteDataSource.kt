@@ -12,6 +12,6 @@ internal class NasaRemoteDataSource(private val api: NasaApi) {
         apiCall { api.getImage(nasaId = nasaId) }
 
     companion object {
-        const val PAGE_SIZE = 20
+        const val PAGE_SIZE = 10
     }
 }

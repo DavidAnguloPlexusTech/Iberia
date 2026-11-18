@@ -1,21 +1,18 @@
 package com.plexus.iberia.ui.splash
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import com.plexus.iberia.ui.R
-import com.plexus.iberia.ui.common.ScreenPlaceholder
+import com.plexus.iberia.ui.splash.components.PulsingLogo
 import com.plexus.iberia.ui.theme.IberiaTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.withContext
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -40,17 +37,12 @@ internal fun SplashRoute(
     SplashScreen(onAnimationFinished = viewModel::onAnimationFinished)
 }
 
-/** Temporary duration until the Lottie animation drives the end of the splash. */
-private val SPLASH_DURATION = 1_500.milliseconds
-
+/** Stateless: shows the pulsing NASA logo and reports when the animation ends. */
 @Composable
 internal fun SplashScreen(onAnimationFinished: () -> Unit, modifier: Modifier = Modifier) {
-    val currentOnAnimationFinished by rememberUpdatedState(onAnimationFinished)
-    LaunchedEffect(Unit) {
-        delay(SPLASH_DURATION)
-        currentOnAnimationFinished()
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        PulsingLogo(onFinished = onAnimationFinished)
     }
-    ScreenPlaceholder(title = stringResource(R.string.splash_title), modifier = modifier)
 }
 
 @Preview(showBackground = true)

@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.plexus.iberia.domain.error.DomainError
 import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.model.SearchPage
+import com.plexus.iberia.domain.usecase.GetRandomImagesUseCase
 import com.plexus.iberia.domain.usecase.SearchImagesUseCase
 import com.plexus.iberia.domain.usecase.SearchImagesUseCase.Companion.FIRST_PAGE
 import com.plexus.iberia.ui.common.asDomainError
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -49,9 +51,11 @@ internal sealed interface HomeEvent {
 
 internal class HomeViewModel(
     private val searchImages: SearchImagesUseCase,
+    private val getRandomImages: GetRandomImagesUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(HomeState())
+    /** Starts loading: random images are requested as soon as the screen opens. */
+    private val _state = MutableStateFlow(HomeState(isLoading = true))
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<HomeEvent>()
@@ -59,6 +63,7 @@ internal class HomeViewModel(
 
     private val queries = MutableStateFlow("")
     private var searchedQuery = ""
+    private var randomFeed = getRandomImages.newFeed()
     private var loadJob: Job? = null
 
     init {
@@ -100,24 +105,24 @@ internal class HomeViewModel(
             .launchIn(viewModelScope)
     }
 
+    /** An empty query shows a new random feed instead of search results. */
     private fun searchFirstPage(query: String) {
         searchedQuery = query
-        loadJob?.cancel()
-        if (query.isEmpty()) {
-            _state.update { HomeState(query = it.query) }
-            return
-        }
+        if (query.isEmpty()) randomFeed = getRandomImages.newFeed()
         _state.update { HomeState(query = it.query, isLoading = true) }
         load(page = FIRST_PAGE)
     }
 
-    /** Cancels any running request, so results of an old query never overwrite a newer one. */
+    /** Requests one page; cancels the previous request so an old one never overwrites a newer one. */
     private fun load(page: Int) {
         loadJob?.cancel()
-        loadJob = searchImages(searchedQuery, page)
+        loadJob = pageFlow(page)
             .onEach { result -> onPageResult(result, page) }
             .launchIn(viewModelScope)
     }
+
+    private fun pageFlow(page: Int): Flow<Result<SearchPage>> =
+        if (searchedQuery.isEmpty()) getRandomImages(randomFeed, page) else searchImages(searchedQuery, page)
 
     private fun onPageResult(result: Result<SearchPage>, page: Int) {
         result.fold(

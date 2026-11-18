@@ -27,12 +27,12 @@ class NasaImageRepositoryImplTest {
     fun tearDown() = server.close()
 
     @Test
-    fun `requests pages of 20 results`() = runTest {
+    fun `requests pages of 10 results`() = runTest {
         server.enqueue(MockResponse.Builder().body(readResource("search_response.json")).build())
 
         repository.search(query = "aircraft", page = 1).first()
 
-        assertEquals("20", server.takeRequest().url.queryParameter("page_size"))
+        assertEquals("${NasaRemoteDataSource.PAGE_SIZE}", server.takeRequest().url.queryParameter("page_size"))
     }
 
     @Test

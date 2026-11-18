@@ -35,6 +35,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    androidResources {
+        // English only: also drops the translations bundled in libraries.
+        localeFilters += "en"
+    }
 }
 
 dependencies {

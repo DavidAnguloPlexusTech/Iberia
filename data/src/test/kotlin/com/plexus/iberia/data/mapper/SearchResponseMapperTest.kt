@@ -63,4 +63,5 @@ class SearchResponseMapperTest {
         assertTrue(page.images.isEmpty())
         assertFalse(page.hasNextPage)
     }
+
 }
