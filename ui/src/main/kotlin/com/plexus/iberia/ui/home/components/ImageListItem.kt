@@ -17,8 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.ui.common.PreviewData
@@ -53,7 +53,7 @@ internal fun ImageListItem(
                 .size(56.dp)
                 .clip(MaterialTheme.shapes.small),
         )
-        ImageListItemTexts(image = image)
+        ImageListItemTexts(image = image, modifier = Modifier.weight(1f))
     }
 }
 
@@ -65,13 +65,12 @@ private fun NasaImage.accessibleDescription(): String = listOfNotNull(
 ).joinToString(separator = ". ")
 
 @Composable
-private fun ImageListItemTexts(image: NasaImage) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun ImageListItemTexts(image: NasaImage, modifier: Modifier = Modifier) {
+    // No max lines: with large fonts the title wraps instead of being cut.
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = image.title,
             style = MaterialTheme.typography.titleMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
         )
         Text(
             text = listOf(image.dateCreated.toDisplayDate(), image.center).filter { it.isNotBlank() }.joinToString(" · "),
@@ -81,6 +80,7 @@ private fun ImageListItemTexts(image: NasaImage) {
     }
 }
 
+@PreviewFontScale
 @Preview(showBackground = true)
 @Composable
 private fun ImageListItemPreview() {

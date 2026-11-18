@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -27,6 +28,7 @@ import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.common.PreviewData
 import com.plexus.iberia.ui.common.components.ErrorMessage
 import com.plexus.iberia.ui.common.components.LoadingAnimation
+import com.plexus.iberia.ui.common.components.ScrollableCenter
 import com.plexus.iberia.ui.common.toMessage
 import com.plexus.iberia.ui.detail.components.DetailCard
 import com.plexus.iberia.ui.detail.components.DetailTopBar
@@ -91,7 +93,9 @@ private fun DetailContent(state: DetailState, onRetry: () -> Unit, modifier: Mod
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         when {
             state.isLoading -> LoadingAnimation()
-            state.error != null -> ErrorMessage(message = state.error.toMessage(), onRetry = onRetry)
+            state.error != null -> ScrollableCenter {
+                ErrorMessage(message = state.error.toMessage(), onRetry = onRetry)
+            }
             state.image != null -> Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -104,6 +108,7 @@ private fun DetailContent(state: DetailState, onRetry: () -> Unit, modifier: Mod
     }
 }
 
+@PreviewFontScale
 @Preview(showBackground = true)
 @Composable
 private fun DetailScreenPreview() {

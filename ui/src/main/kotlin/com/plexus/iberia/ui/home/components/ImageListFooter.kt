@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.domain.error.DomainError
 import com.plexus.iberia.ui.common.components.ErrorMessage
@@ -30,6 +31,7 @@ internal fun ImageListFooter(
     }
 }
 
+@PreviewFontScale
 @Preview(showBackground = true)
 @Composable
 private fun ImageListFooterErrorPreview() {
