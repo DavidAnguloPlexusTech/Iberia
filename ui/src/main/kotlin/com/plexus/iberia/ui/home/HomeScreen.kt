@@ -11,6 +11,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -66,13 +70,19 @@ internal fun HomeScreen(
     onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val screenTitle = stringResource(R.string.home_screen)
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.semantics {
+            paneTitle = screenTitle
+            isTraversalGroup = true
+        },
         topBar = {
             SearchBar(
                 query = state.query,
                 onQueryChange = onQueryChange,
+                // Read first: the search field comes before the results.
                 modifier = Modifier
+                    .semantics { traversalIndex = -1f }
                     .statusBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
             )

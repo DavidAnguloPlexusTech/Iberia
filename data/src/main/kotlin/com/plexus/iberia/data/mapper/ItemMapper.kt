@@ -10,8 +10,8 @@ internal fun ItemDto.toNasaImage(): NasaImage? {
     val imageLinks = links.orEmpty()
     return NasaImage(
         id = id,
-        title = itemData.title.orEmpty(),
-        description = itemData.description.orEmpty(),
+        title = itemData.title.orEmpty().withoutHtml(),
+        description = itemData.description.orEmpty().withoutHtml(),
         thumbnailUrl = imageLinks.thumbnailUrl(),
         imageUrl = imageLinks.largestImageUrl(),
         dateCreated = itemData.dateCreated.orEmpty(),
