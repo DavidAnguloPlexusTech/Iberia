@@ -1,6 +1,8 @@
 package com.plexus.iberia.ui.home.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,9 +26,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.domain.model.NasaImage
+import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.common.PreviewData
 import com.plexus.iberia.ui.common.components.NasaAsyncImage
-import com.plexus.iberia.ui.R
+import com.plexus.iberia.ui.common.focusBorder
 import com.plexus.iberia.ui.common.toAccessibleDate
 import com.plexus.iberia.ui.common.toDisplayDate
 import com.plexus.iberia.ui.theme.IberiaTheme
@@ -36,10 +42,19 @@ internal fun ImageListItem(
     modifier: Modifier = Modifier,
 ) {
     val description = image.accessibleDescription()
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClickLabel = stringResource(R.string.open_details), role = Role.Button, onClick = onClick)
+            .focusBorder(isFocused, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(),
+                onClickLabel = stringResource(R.string.open_details),
+                role = Role.Button,
+                onClick = onClick,
+            )
             // The whole row is read as one item, with the date said in words instead of digits.
             .clearAndSetSemantics { contentDescription = description }
             .padding(horizontal = 16.dp, vertical = 12.dp),
