@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import com.plexus.iberia.ui.R
@@ -27,11 +29,15 @@ internal fun SearchBar(
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val label = stringResource(R.string.search_placeholder)
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = modifier.fillMaxWidth(),
-        placeholder = { Text(text = stringResource(R.string.search_placeholder)) },
+        // The placeholder disappears while typing; the description keeps the field named for TalkBack.
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = label },
+        placeholder = { Text(text = label) },
         leadingIcon = { SearchIcon() },
         trailingIcon = { if (query.isNotEmpty()) ClearButton(onClick = { onQueryChange("") }) },
         singleLine = true,
@@ -45,12 +51,10 @@ internal fun SearchBar(
     )
 }
 
+/** Decorative: the field itself is already announced as the search field. */
 @Composable
 private fun SearchIcon() {
-    Icon(
-        painter = painterResource(R.drawable.ic_search),
-        contentDescription = stringResource(R.string.search_icon),
-    )
+    Icon(painter = painterResource(R.drawable.ic_search), contentDescription = null)
 }
 
 @Composable

@@ -12,12 +12,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.common.PreviewData
 import com.plexus.iberia.ui.common.components.ErrorMessage
 import com.plexus.iberia.ui.common.components.LoadingAnimation
@@ -61,9 +67,14 @@ internal fun DetailScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val screenTitle = stringResource(R.string.detail_screen)
     Scaffold(
-        modifier = modifier,
-        topBar = { DetailTopBar(onBackClick = onBackClick) },
+        modifier = modifier.semantics {
+            paneTitle = screenTitle
+            isTraversalGroup = true
+        },
+        // Read first: the back button comes before the content.
+        topBar = { DetailTopBar(onBackClick = onBackClick, modifier = Modifier.semantics { traversalIndex = -1f }) },
     ) { innerPadding ->
         DetailContent(
             state = state,

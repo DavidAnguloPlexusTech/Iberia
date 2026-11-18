@@ -13,12 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.ui.common.PreviewData
 import com.plexus.iberia.ui.common.components.NasaAsyncImage
+import com.plexus.iberia.ui.R
+import com.plexus.iberia.ui.common.toAccessibleDate
 import com.plexus.iberia.ui.common.toDisplayDate
 import com.plexus.iberia.ui.theme.IberiaTheme
 
@@ -29,10 +35,13 @@ internal fun ImageListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val description = image.accessibleDescription()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClickLabel = stringResource(R.string.open_details), role = Role.Button, onClick = onClick)
+            // The whole row is read as one item, with the date said in words instead of digits.
+            .clearAndSetSemantics { contentDescription = description }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -47,6 +56,13 @@ internal fun ImageListItem(
         ImageListItemTexts(image = image)
     }
 }
+
+@Composable
+private fun NasaImage.accessibleDescription(): String = listOfNotNull(
+    title,
+    dateCreated.takeIf { it.isNotBlank() }?.let { stringResource(R.string.image_item_date, it.toAccessibleDate()) },
+    center.takeIf { it.isNotBlank() }?.let { stringResource(R.string.image_item_center, it) },
+).joinToString(separator = ". ")
 
 @Composable
 private fun ImageListItemTexts(image: NasaImage) {
