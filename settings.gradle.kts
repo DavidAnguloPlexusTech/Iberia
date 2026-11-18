@@ -24,3 +24,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Iberia"
 include(":app")
+include(":domain")
+include(":data")
+include(":ui")
