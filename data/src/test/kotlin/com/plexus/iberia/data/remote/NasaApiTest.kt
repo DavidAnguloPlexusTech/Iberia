@@ -1,0 +1,44 @@
+package com.plexus.iberia.data.remote
+
+import com.plexus.iberia.data.createNasaApi
+import com.plexus.iberia.data.readResource
+import kotlinx.coroutines.test.runTest
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class NasaApiTest {
+
+    private val server = MockWebServer()
+    private val api = server.createNasaApi()
+
+    @After
+    fun tearDown() = server.shutdown()
+
+    @Test
+    fun `search sends the expected query parameters`() = runTest {
+        server.enqueue(MockResponse().setBody(readResource("search_response.json")))
+
+        api.search(query = "aircraft", page = 2, pageSize = 20)
+
+        val url = server.takeRequest().requestUrl!!
+        assertEquals("/search", url.encodedPath)
+        assertEquals("aircraft", url.queryParameter("q"))
+        assertEquals("2", url.queryParameter("page"))
+        assertEquals("20", url.queryParameter("page_size"))
+        assertEquals("image", url.queryParameter("media_type"))
+    }
+
+    @Test
+    fun `search parses the response`() = runTest {
+        server.enqueue(MockResponse().setBody(readResource("search_response.json")))
+
+        val response = api.search(query = "aircraft", page = 1, pageSize = 20)
+
+        val firstItem = response.collection?.items?.first()?.data?.first()
+        assertEquals("GRC-2015-C-04751", firstItem?.nasaId)
+        assertEquals("2015-07-29T00:00:00Z", firstItem?.dateCreated)
+    }
+}
