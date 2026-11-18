@@ -15,6 +15,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.theme.IberiaTheme
@@ -43,6 +44,7 @@ internal fun ErrorMessage(
     }
 }
 
+@PreviewFontScale
 @Preview(showBackground = true)
 @Composable
 private fun ErrorMessagePreview() {

@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.ui.R
@@ -65,6 +66,7 @@ private fun DetailInfo(image: NasaImage) {
     }
 }
 
+@PreviewFontScale
 @Preview(showBackground = true)
 @Composable
 private fun DetailCardPreview() {

@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.theme.IberiaTheme
@@ -30,13 +31,22 @@ internal fun DetailInfoRow(
     ) {
         Text(
             text = label.uppercase(),
+            modifier = Modifier.alignByBaseline(),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
         )
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
+        // Takes only the remaining width, so long values wrap instead of overflowing.
+        Text(
+            text = value,
+            modifier = Modifier
+                .alignByBaseline()
+                .weight(1f, fill = false),
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
 
+@PreviewFontScale
 @Preview(showBackground = true)
 @Composable
 private fun DetailInfoRowPreview() {
