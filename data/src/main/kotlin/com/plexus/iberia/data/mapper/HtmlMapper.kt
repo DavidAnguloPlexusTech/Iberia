@@ -12,7 +12,6 @@ private val HTML_ENTITIES = mapOf(
     "&amp;" to "&",
 )
 
-/** Some NASA texts contain HTML; the app shows them, and screen readers read them, as plain text. */
 internal fun String.withoutHtml(): String =
     HTML_ENTITIES.entries
         .fold(replace(HTML_TAG, " ")) { text, (entity, character) -> text.replace(entity, character) }
