@@ -84,7 +84,6 @@ internal fun HomeScreen(
             SearchBar(
                 query = state.query,
                 onQueryChange = onQueryChange,
-                // Read first: the search field comes before the results.
                 modifier = Modifier
                     .semantics { traversalIndex = -1f }
                     .statusBarsPadding()
@@ -100,7 +99,6 @@ internal fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                // Keeps messages and buttons above the keyboard while searching.
                 .consumeWindowInsets(innerPadding)
                 .imePadding(),
         )

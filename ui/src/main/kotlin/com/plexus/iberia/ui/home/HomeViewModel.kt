@@ -54,7 +54,6 @@ internal class HomeViewModel(
     private val getRandomImages: GetRandomImagesUseCase,
 ) : ViewModel() {
 
-    /** Starts loading: random images are requested as soon as the screen opens. */
     private val _state = MutableStateFlow(HomeState(isLoading = true))
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
@@ -94,7 +93,6 @@ internal class HomeViewModel(
         viewModelScope.launch { _events.emit(HomeEvent.NavigateToDetail(id)) }
     }
 
-    /** Waits until the user stops typing and ignores queries equal to the previous one. */
     @OptIn(FlowPreview::class)
     private fun observeQueries() {
         queries
@@ -105,7 +103,6 @@ internal class HomeViewModel(
             .launchIn(viewModelScope)
     }
 
-    /** An empty query shows a new random feed instead of search results. */
     private fun searchFirstPage(query: String) {
         searchedQuery = query
         if (query.isEmpty()) randomFeed = getRandomImages.newFeed()
@@ -113,7 +110,6 @@ internal class HomeViewModel(
         load(page = FIRST_PAGE)
     }
 
-    /** Requests one page; cancels the previous request so an old one never overwrites a newer one. */
     private fun load(page: Int) {
         loadJob?.cancel()
         loadJob = pageFlow(page)
@@ -147,7 +143,6 @@ internal class HomeViewModel(
         _state.update { it.copy(isLoading = false, isLoadingNextPage = false, error = error) }
     }
 
-    /** Pages may overlap; repeated ids would crash the list, which uses them as keys. */
     private fun List<NasaImage>.plusUnique(newImages: List<NasaImage>): List<NasaImage> =
         (this + newImages).distinctBy { it.id }
 

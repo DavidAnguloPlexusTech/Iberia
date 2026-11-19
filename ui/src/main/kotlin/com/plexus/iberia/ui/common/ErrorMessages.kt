@@ -5,7 +5,6 @@ import androidx.compose.ui.res.stringResource
 import com.plexus.iberia.domain.error.DomainError
 import com.plexus.iberia.ui.R
 
-/** Text shown to the user for each domain error. */
 @Composable
 internal fun DomainError.toMessage(): String = when (this) {
     is DomainError.Network -> stringResource(R.string.error_network)

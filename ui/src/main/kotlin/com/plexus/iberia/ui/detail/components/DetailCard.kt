@@ -25,14 +25,12 @@ import com.plexus.iberia.ui.theme.IberiaTheme
 
 private const val IMAGE_ASPECT_RATIO = 4f / 3f
 
-/** Photo, title, metadata and description of an image. */
 @Composable
 internal fun DetailCard(image: NasaImage, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Decorative for TalkBack: the title and the description right after it describe the photo.
         NasaAsyncImage(
             url = image.imageUrl,
             contentDescription = null,

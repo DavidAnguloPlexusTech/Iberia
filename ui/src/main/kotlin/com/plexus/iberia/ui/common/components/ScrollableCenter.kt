@@ -12,10 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
-/**
- * Centers short content and lets it scroll when it does not fit, for example with a large font
- * or with the keyboard open, so nothing (like a retry button) becomes unreachable.
- */
 @Composable
 internal fun ScrollableCenter(
     modifier: Modifier = Modifier,

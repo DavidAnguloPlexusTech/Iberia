@@ -2,8 +2,6 @@ package com.plexus.iberia.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Space-age pop palette: atomic orange, teal and mustard over cream or night blue.
-
 internal val Cream = Color(0xFFF4EBDC)
 internal val CreamDark = Color(0xFFEADFCB)
 internal val Ink = Color(0xFF1B1F3B)

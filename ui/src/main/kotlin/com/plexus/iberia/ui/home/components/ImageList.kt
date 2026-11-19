@@ -23,10 +23,8 @@ import com.plexus.iberia.ui.theme.IberiaTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
-/** Items left before the end at which the next page is requested. */
 private const val LOAD_MORE_THRESHOLD = 5
 
-/** Infinite list: asks for the next page when the user gets close to the end. */
 @Composable
 internal fun ImageList(
     images: List<NasaImage>,
@@ -57,7 +55,6 @@ internal fun ImageList(
     }
 }
 
-/** Observes scrolling outside composition, so scrolling never triggers recompositions. */
 @Composable
 private fun LoadNextPageWhenNearEnd(listState: LazyListState, onLoadNextPage: () -> Unit) {
     val currentOnLoadNextPage by rememberUpdatedState(onLoadNextPage)

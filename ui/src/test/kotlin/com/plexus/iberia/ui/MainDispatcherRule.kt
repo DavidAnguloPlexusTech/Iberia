@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
-/** Replaces Dispatchers.Main (used by viewModelScope) with a test dispatcher with virtual time. */
 class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher()) : TestWatcher() {
 
     override fun starting(description: Description) = Dispatchers.setMain(dispatcher)

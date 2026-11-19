@@ -14,7 +14,6 @@ import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.common.components.FocusableIconButton
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** Top bar of the detail with the back button. */
 @Composable
 internal fun DetailTopBar(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(

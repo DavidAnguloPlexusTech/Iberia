@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- NASA insignia, converted from Wikimedia Commons NASA_logo.svg. US Government work (public domain);
-     the insignia is a protected NASA mark: used here only for this private technical test. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="110dp"
     android:height="92dp"

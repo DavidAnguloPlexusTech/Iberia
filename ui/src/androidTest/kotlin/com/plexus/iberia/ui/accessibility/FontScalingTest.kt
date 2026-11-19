@@ -34,7 +34,6 @@ import com.plexus.iberia.ui.theme.IberiaTheme
 import org.junit.Rule
 import org.junit.Test
 
-/** With the largest system font (200%) no text is cut and every control stays reachable and usable. */
 class FontScalingTest {
 
     @get:Rule
@@ -54,7 +53,6 @@ class FontScalingTest {
             }
         }
 
-        // Two lines of a 200% title are about 100dp; the whole title needs far more.
         composeRule.onNodeWithTag(ITEM).assertHeightIsAtLeast(300.dp)
     }
 
@@ -66,7 +64,6 @@ class FontScalingTest {
             }
         }
 
-        // Kept on one line the value would be cut at the screen edge; wrapped, the row grows.
         composeRule.onNodeWithTag(ROW).assertHeightIsAtLeast(150.dp)
     }
 
@@ -87,7 +84,6 @@ class FontScalingTest {
     @Test
     fun retryStaysReachableWhenTheMessageDoesNotFit() {
         setLargeFontContent {
-            // The large search field leaves little room: the message and its button need scrolling.
             Box(Modifier.height(360.dp)) {
                 HomeScreen(
                     state = HomeState(error = DomainError.Network()),
@@ -108,7 +104,6 @@ class FontScalingTest {
 
         val clearButton = composeRule.onNodeWithContentDescription("Clear search").fetchSemanticsNode()
         val minTouchSize = with(composeRule.density) { 48.dp.toPx() }
-        // The icon is drawn smaller; what matters is the area that reacts to touch.
         assert(clearButton.touchBoundsInRoot.width >= minTouchSize) { "Touch width ${clearButton.touchBoundsInRoot.width}" }
         assert(clearButton.touchBoundsInRoot.height >= minTouchSize) { "Touch height ${clearButton.touchBoundsInRoot.height}" }
         composeRule.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.SetText)).assertHeightIsAtLeast(56.dp)

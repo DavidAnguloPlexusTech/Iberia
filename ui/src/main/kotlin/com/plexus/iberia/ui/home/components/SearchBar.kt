@@ -22,7 +22,6 @@ import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.common.components.FocusableIconButton
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** Search field: the search runs while typing, so the keyboard action only hides the keyboard. */
 @Composable
 internal fun SearchBar(
     query: String,
@@ -34,7 +33,6 @@ internal fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        // The placeholder disappears while typing; the description keeps the field named for TalkBack.
         modifier = modifier
             .fillMaxWidth()
             .semantics { contentDescription = label },
@@ -52,7 +50,6 @@ internal fun SearchBar(
     )
 }
 
-/** Decorative: the field itself is already announced as the search field. */
 @Composable
 private fun SearchIcon() {
     Icon(painter = painterResource(R.drawable.ic_search), contentDescription = null)

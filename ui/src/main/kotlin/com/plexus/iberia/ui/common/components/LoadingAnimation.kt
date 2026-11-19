@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** Thin progress indicator used while content loads. */
 @Composable
 internal fun LoadingAnimation(
     modifier: Modifier = Modifier,

@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** One "label: value" line of the detail, such as the date or the center. */
 @Composable
 internal fun DetailInfoRow(
     label: String,
@@ -25,7 +24,6 @@ internal fun DetailInfoRow(
 ) {
     val description = stringResource(R.string.detail_info, label, accessibleValue)
     Row(
-        // Read as one sentence ("Date: July 29, 2015") instead of two separate items.
         modifier = modifier.clearAndSetSemantics { contentDescription = description },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -35,7 +33,6 @@ internal fun DetailInfoRow(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
         )
-        // Takes only the remaining width, so long values wrap instead of overflowing.
         Text(
             text = value,
             modifier = Modifier

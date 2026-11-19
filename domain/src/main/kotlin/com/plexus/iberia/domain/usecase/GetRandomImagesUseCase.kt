@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.random.Random
 
-
 class GetRandomImagesUseCase(
     private val repository: NasaImageRepository,
     private val random: Random = Random.Default,
@@ -17,7 +16,6 @@ class GetRandomImagesUseCase(
         topics = TOPICS.shuffled(random),
         firstPage = random.nextInt(from = 1, until = MAX_FIRST_PAGE + 1),
     )
-
 
     operator fun invoke(feed: RandomFeed, page: Int): Flow<Result<SearchPage>> {
         val index = page - 1

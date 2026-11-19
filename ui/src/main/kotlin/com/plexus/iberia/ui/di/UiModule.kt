@@ -7,7 +7,6 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-/** ViewModels of every screen. */
 val uiModule = module {
     viewModelOf(::SplashViewModel)
     viewModelOf(::HomeViewModel)

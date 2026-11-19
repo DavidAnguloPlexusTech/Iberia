@@ -17,7 +17,6 @@ import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.common.focusBorder
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** Icon button with a visible focus outline and a required label, for switch and keyboard users. */
 @Composable
 internal fun FocusableIconButton(
     painter: Painter,

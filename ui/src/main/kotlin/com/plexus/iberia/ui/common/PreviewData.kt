@@ -2,7 +2,6 @@ package com.plexus.iberia.ui.common
 
 import com.plexus.iberia.domain.model.NasaImage
 
-/** Sample data shared by the composable previews. */
 internal object PreviewData {
 
     val image = NasaImage(

@@ -1,13 +1,11 @@
 name: Tests
 
-# Runs the unit tests of every module: domain, data, ui (presentation) and app.
 on:
   push:
     branches: [main, develop, 'feature/**', 'fix/**', 'release/**']
   pull_request:
     branches: [main, develop]
 
-# A newer push to the same branch cancels the run that is still in progress.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -30,14 +28,12 @@ jobs:
           distribution: temurin
           java-version: 25
 
-      # Caches Gradle and validates the Gradle wrapper checksum.
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
       - name: Run unit tests
         run: ./gradlew :domain:test testDebugUnitTest --stacktrace
 
-      # Reports are kept even when a test fails, to see which one and why.
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v7
