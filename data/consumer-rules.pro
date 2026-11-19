@@ -1,0 +1,1 @@
+-keep class com.plexus.iberia.data.remote.dto.** { *; }
