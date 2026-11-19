@@ -177,6 +177,8 @@ Se resuelve en varias capas:
 3. **La cancelación llega hasta la red.** Las llamadas de Retrofit son funciones `suspend` y se cancelan junto con la corrutina. `apiCall` relanza la `CancellationException` en lugar de convertirla en un error, para no romper ese mecanismo.
 4. **Ámbito.** Todo corre en `viewModelScope`: si el usuario sale de la pantalla, cualquier petición en curso se cancela sola.
 
+Lo comprueba `HomeViewModelTest`: lanza una búsqueda lenta, escribe otra antes de que responda y verifica que la primera nunca llega a terminar y que solo se muestran los resultados de la segunda.
+
 ### 5.2 Caché
 
 Caché **en memoria**:
@@ -267,7 +269,7 @@ Gson, con DTOs `internal`, todos los campos nullables (Gson no respeta la null-s
 
 | Clase | Qué comprueba |
 |---|---|
-| `HomeViewModelTest` (15) | Debounce, **solo se busca la última consulta al escribir rápido**, estado de carga, errores, reintentos, paginación, feed aleatorio y navegación. |
+| `HomeViewModelTest` (16) | **Cancelación**: una búsqueda nueva cancela la que está en curso y solo se muestran sus resultados. También debounce (solo se busca la última consulta al escribir rápido), estado de carga, errores, reintentos, paginación, feed aleatorio y navegación. |
 | `DetailViewModelTest` (6) | Pide la imagen de su id, carga, error, reintento y volver atrás. |
 | `SplashViewModelTest` (1), `DateFormattingTest` (3) | Navegación desde la Splash y formato de fechas. |
 | `AppModulesTest` (1) | Grafo de Koin completo. |

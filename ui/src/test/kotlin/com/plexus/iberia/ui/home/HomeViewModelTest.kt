@@ -8,6 +8,7 @@ import com.plexus.iberia.domain.usecase.GetRandomImagesUseCase
 import com.plexus.iberia.domain.usecase.SearchImagesUseCase
 import com.plexus.iberia.ui.MainDispatcherRule
 import com.plexus.iberia.ui.home.HomeViewModel.Companion.SEARCH_DEBOUNCE
+import com.plexus.iberia.ui.image
 import com.plexus.iberia.ui.searchPage
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -16,6 +17,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -28,6 +30,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.whenever
@@ -80,6 +83,30 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("apollo" to 1), searches())
+    }
+
+    @Test
+    fun `a new search cancels the one in progress and only its results are shown`() = runTest {
+        var oldSearchFinished = false
+        whenever(repository.search(eq("apollo"), any())).thenAnswer {
+            flow {
+                delay(2.seconds)
+                oldSearchFinished = true
+                emit(Result.success(pageOf("apollo")))
+            }
+        }
+        whenever(repository.search(eq("mars"), any())).thenAnswer { flowOf(Result.success(pageOf("mars"))) }
+
+        viewModel.onQueryChange("apollo")
+        advanceTimeBy(SEARCH_DEBOUNCE + 1.milliseconds)
+        runCurrent()
+        assertTrue(viewModel.state.value.isLoading)
+
+        viewModel.onQueryChange("mars")
+        advanceUntilIdle()
+
+        assertEquals(pageOf("mars").images, viewModel.state.value.images)
+        assertFalse(oldSearchFinished)
     }
 
     @Test
@@ -217,4 +244,6 @@ class HomeViewModelTest {
         mockingDetails(repository).invocations
             .filter { it.method.name == "search" }
             .map { it.getArgument<String>(0) to it.getArgument<Int>(1) }
+
+    private fun pageOf(query: String) = SearchPage(images = listOf(image("$query-1")), hasNextPage = false)
 }
