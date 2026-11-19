@@ -1,55 +1,45 @@
 package com.plexus.iberia.domain.usecase
 
-import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.model.SearchPage
 import com.plexus.iberia.domain.repository.NasaImageRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class SearchImagesUseCaseTest {
 
-    private val repository = FakeNasaImageRepository()
+    private val repository: NasaImageRepository = mock()
     private val searchImages = SearchImagesUseCase(repository)
+    private val page = SearchPage(images = emptyList(), hasNextPage = false)
+
+    @Before
+    fun setUp() {
+        whenever(repository.search(any(), any())).thenReturn(flowOf(Result.success(page)))
+    }
 
     @Test
     fun `trims the query before searching`() = runTest {
         searchImages("  apollo  ").first()
 
-        assertEquals("apollo", repository.lastQuery)
+        verify(repository).search(query = "apollo", page = SearchImagesUseCase.FIRST_PAGE)
     }
 
     @Test
-    fun `searches the first page by default`() = runTest {
-        searchImages("apollo").first()
+    fun `searches the requested page`() = runTest {
+        searchImages("apollo", page = 3).first()
 
-        assertEquals(SearchImagesUseCase.FIRST_PAGE, repository.lastPage)
+        verify(repository).search(query = "apollo", page = 3)
     }
 
     @Test
     fun `returns the repository result`() = runTest {
-        val result = searchImages("apollo", page = 2).first()
-
-        assertEquals(Result.success(FakeNasaImageRepository.PAGE), result)
-    }
-
-    private class FakeNasaImageRepository : NasaImageRepository {
-        var lastQuery: String? = null
-        var lastPage: Int? = null
-
-        override fun search(query: String, page: Int): Flow<Result<SearchPage>> {
-            lastQuery = query
-            lastPage = page
-            return flowOf(Result.success(PAGE))
-        }
-
-        override fun getImage(id: String): Flow<Result<NasaImage>> = error("Not used")
-
-        companion object {
-            val PAGE = SearchPage(images = emptyList(), hasNextPage = false)
-        }
+        assertEquals(Result.success(page), searchImages("apollo").first())
     }
 }

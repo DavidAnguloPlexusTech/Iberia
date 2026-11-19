@@ -1,34 +1,41 @@
 package com.plexus.iberia.domain.usecase
 
+import com.plexus.iberia.domain.error.DomainError
 import com.plexus.iberia.domain.model.NasaImage
-import com.plexus.iberia.domain.model.SearchPage
 import com.plexus.iberia.domain.repository.NasaImageRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class GetImageUseCaseTest {
 
+    private val repository: NasaImageRepository = mock()
+    private val getImage = GetImageUseCase(repository)
+
     @Test
     fun `returns the image of the requested id`() = runTest {
-        val getImage = GetImageUseCase(FakeRepository())
+        val image = image("GRC-1")
+        whenever(repository.getImage("GRC-1")).thenReturn(flowOf(Result.success(image)))
 
-        assertEquals("GRC-1", getImage("GRC-1").first().getOrThrow().id)
+        assertEquals(image, getImage("GRC-1").first().getOrThrow())
+        verify(repository).getImage("GRC-1")
     }
 
-    private class FakeRepository : NasaImageRepository {
-        override fun search(query: String, page: Int): Flow<Result<SearchPage>> = error("Not used")
+    @Test
+    fun `returns the repository error`() = runTest {
+        whenever(repository.getImage("missing")).thenReturn(flowOf(Result.failure(DomainError.NotFound())))
 
-        override fun getImage(id: String): Flow<Result<NasaImage>> = flowOf(
-            Result.success(
-                NasaImage(
-                    id = id, title = "", description = "", thumbnailUrl = null, imageUrl = null,
-                    dateCreated = "", center = "", keywords = emptyList(), photographer = null,
-                ),
-            ),
-        )
+        assertTrue(getImage("missing").first().exceptionOrNull() is DomainError.NotFound)
     }
+
+    private fun image(id: String) = NasaImage(
+        id = id, title = "", description = "", thumbnailUrl = null, imageUrl = null,
+        dateCreated = "", center = "", keywords = emptyList(), photographer = null,
+    )
 }

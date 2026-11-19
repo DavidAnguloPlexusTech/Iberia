@@ -1,24 +1,33 @@
 package com.plexus.iberia.domain.usecase
 
-import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.model.RandomFeed
 import com.plexus.iberia.domain.model.SearchPage
 import com.plexus.iberia.domain.repository.NasaImageRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import kotlin.random.Random
 
 class GetRandomImagesUseCaseTest {
 
-    private val repository = FakeRepository()
+    private val repository: NasaImageRepository = mock()
     private val getRandomImages = GetRandomImagesUseCase(repository)
     private val feed = RandomFeed(topics = listOf("mars", "moon", "sun"), firstPage = 7)
+
+    @Before
+    fun setUp() {
+        givenRepositoryPage(hasNextPage = true)
+    }
 
     @Test
     fun `new feed shuffles every topic and starts on a page in range`() {
@@ -39,39 +48,33 @@ class GetRandomImagesUseCaseTest {
 
     @Test
     fun `each page uses the next topic`() = runTest {
-        val searches = (1..3).map { page -> searchOf(page) }
+        (1..3).forEach { page -> getRandomImages(feed, page).first() }
 
-        assertEquals(listOf("mars" to 7, "moon" to 7, "sun" to 7), searches)
+        inOrder(repository) {
+            verify(repository).search(query = "mars", page = 7)
+            verify(repository).search(query = "moon", page = 7)
+            verify(repository).search(query = "sun", page = 7)
+        }
     }
 
     @Test
     fun `after the last topic it starts again on the next api page`() = runTest {
-        assertEquals("mars" to 8, searchOf(page = 4))
+        getRandomImages(feed, page = 4).first()
+
+        verify(repository).search(query = "mars", page = 8)
     }
 
     @Test
     fun `the feed never ends`() = runTest {
-        repository.hasNextPage = false
+        givenRepositoryPage(hasNextPage = false)
 
         val searchPage = getRandomImages(feed, page = 1).first().getOrThrow()
 
         assertTrue(searchPage.hasNextPage)
     }
 
-    private suspend fun searchOf(page: Int): Pair<String, Int>? {
-        getRandomImages(feed, page).first()
-        return repository.lastSearch
-    }
-
-    private class FakeRepository : NasaImageRepository {
-        var lastSearch: Pair<String, Int>? = null
-        var hasNextPage = true
-
-        override fun search(query: String, page: Int): Flow<Result<SearchPage>> {
-            lastSearch = query to page
-            return flowOf(Result.success(SearchPage(images = emptyList(), hasNextPage = hasNextPage)))
-        }
-
-        override fun getImage(id: String): Flow<Result<NasaImage>> = error("Not used")
+    private fun givenRepositoryPage(hasNextPage: Boolean) {
+        whenever(repository.search(any(), any()))
+            .thenReturn(flowOf(Result.success(SearchPage(images = emptyList(), hasNextPage = hasNextPage))))
     }
 }

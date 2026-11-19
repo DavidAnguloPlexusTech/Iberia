@@ -2,13 +2,20 @@ package com.plexus.iberia.ui.home
 
 import app.cash.turbine.test
 import com.plexus.iberia.domain.error.DomainError
+import com.plexus.iberia.domain.model.SearchPage
+import com.plexus.iberia.domain.repository.NasaImageRepository
 import com.plexus.iberia.domain.usecase.GetRandomImagesUseCase
 import com.plexus.iberia.domain.usecase.SearchImagesUseCase
-import com.plexus.iberia.ui.FakeNasaImageRepository
 import com.plexus.iberia.ui.MainDispatcherRule
 import com.plexus.iberia.ui.home.HomeViewModel.Companion.SEARCH_DEBOUNCE
 import com.plexus.iberia.ui.searchPage
+import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -17,11 +24,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Duration.Companion.milliseconds
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.mockingDetails
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -29,9 +38,22 @@ class HomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val repository = FakeNasaImageRepository()
+    private val repository: NasaImageRepository = mock()
+    private var searchResults: (page: Int) -> Result<SearchPage> = { Result.success(searchPage(it)) }
+    private var responseDelay: Duration = Duration.ZERO
     private val viewModel by lazy {
         HomeViewModel(SearchImagesUseCase(repository), GetRandomImagesUseCase(repository, Random(0)))
+    }
+
+    @Before
+    fun setUp() {
+        whenever(repository.search(any(), any())).thenAnswer { invocation ->
+            val page = invocation.getArgument<Int>(1)
+            flow {
+                delay(responseDelay)
+                emit(searchResults(page))
+            }
+        }
     }
 
     @Test
@@ -39,7 +61,7 @@ class HomeViewModelTest {
         viewModel.onQueryChange("  apollo  ")
         advanceUntilIdle()
 
-        assertEquals(listOf("apollo" to 1), repository.searches)
+        assertEquals(listOf("apollo" to 1), searches())
         assertEquals(searchPage(1).images, viewModel.state.value.images)
     }
 
@@ -57,12 +79,12 @@ class HomeViewModelTest {
         viewModel.onQueryChange("apollo")
         advanceUntilIdle()
 
-        assertEquals(listOf("apollo" to 1), repository.searches)
+        assertEquals(listOf("apollo" to 1), searches())
     }
 
     @Test
     fun `shows loading while the first page is requested`() = runTest {
-        repository.responseDelay = 1.seconds
+        responseDelay = 1.seconds
         viewModel.onQueryChange("apollo")
         advanceTimeBy(SEARCH_DEBOUNCE + 1.milliseconds)
         runCurrent()
@@ -72,7 +94,7 @@ class HomeViewModelTest {
 
     @Test
     fun `exposes the error when the search fails`() = runTest {
-        repository.searchResults = { Result.failure(DomainError.Network()) }
+        searchResults = { Result.failure(DomainError.Network()) }
         viewModel.onQueryChange("apollo")
         advanceUntilIdle()
 
@@ -97,19 +119,19 @@ class HomeViewModelTest {
 
     @Test
     fun `does not request more pages after the last one`() = runTest {
-        repository.searchResults = { searchPage(it, hasNextPage = false).let { page -> Result.success(page) } }
+        searchResults = { searchPage(it, hasNextPage = false).let { page -> Result.success(page) } }
         searchFor("apollo")
         viewModel.loadNextPage()
         advanceUntilIdle()
 
-        assertEquals(listOf("apollo" to 1), repository.searches)
+        assertEquals(listOf("apollo" to 1), searches())
     }
 
     @Test
     fun `retry repeats the failed first page`() = runTest {
-        repository.searchResults = { Result.failure(DomainError.Network()) }
+        searchResults = { Result.failure(DomainError.Network()) }
         searchFor("apollo")
-        repository.searchResults = { Result.success(searchPage(it)) }
+        searchResults = { Result.success(searchPage(it)) }
         viewModel.retry()
         advanceUntilIdle()
 
@@ -120,10 +142,10 @@ class HomeViewModelTest {
     @Test
     fun `retry repeats the failed next page`() = runTest {
         searchFor("apollo")
-        repository.searchResults = { Result.failure(DomainError.Network()) }
+        searchResults = { Result.failure(DomainError.Network()) }
         viewModel.loadNextPage()
         advanceUntilIdle()
-        repository.searchResults = { Result.success(searchPage(it)) }
+        searchResults = { Result.success(searchPage(it)) }
         viewModel.retry()
         advanceUntilIdle()
 
@@ -135,7 +157,7 @@ class HomeViewModelTest {
         viewModel
         advanceUntilIdle()
 
-        val (topic, page) = repository.searches.single()
+        val (topic, page) = searches().single()
         assertTrue(topic in GetRandomImagesUseCase.TOPICS)
         assertEquals(searchPage(page).images, viewModel.state.value.images)
     }
@@ -147,11 +169,11 @@ class HomeViewModelTest {
         viewModel.loadNextPage()
         advanceUntilIdle()
 
-        val (firstTopic, firstPage) = repository.searches[0]
-        val (secondTopic, secondPage) = repository.searches[1]
+        val (firstTopic, firstPage) = searches()[0]
+        val (secondTopic, secondPage) = searches()[1]
         assertNotEquals(firstTopic, secondTopic)
         assertEquals(firstPage, secondPage)
-        assertEquals(2, repository.searches.size)
+        assertEquals(2, searches().size)
     }
 
     @Test
@@ -160,16 +182,16 @@ class HomeViewModelTest {
         viewModel.onQueryChange("   ")
         advanceUntilIdle()
 
-        assertTrue(repository.searches.last().first in GetRandomImagesUseCase.TOPICS)
+        assertTrue(searches().last().first in GetRandomImagesUseCase.TOPICS)
     }
 
     @Test
     fun `retry repeats the failed random page`() = runTest {
-        repository.searchResults = { Result.failure(DomainError.Network()) }
+        searchResults = { Result.failure(DomainError.Network()) }
         viewModel
         advanceUntilIdle()
         assertTrue(viewModel.state.value.error is DomainError.Network)
-        repository.searchResults = { Result.success(searchPage(it)) }
+        searchResults = { Result.success(searchPage(it)) }
         viewModel.retry()
         advanceUntilIdle()
 
@@ -190,4 +212,9 @@ class HomeViewModelTest {
         viewModel.onQueryChange(query)
         advanceUntilIdle()
     }
+
+    private fun searches(): List<Pair<String, Int>> =
+        mockingDetails(repository).invocations
+            .filter { it.method.name == "search" }
+            .map { it.getArgument<String>(0) to it.getArgument<Int>(1) }
 }
