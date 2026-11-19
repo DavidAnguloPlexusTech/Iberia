@@ -10,6 +10,5 @@ import org.koin.dsl.module
 val domainModule = module {
     factoryOf(::SearchImagesUseCase)
     factoryOf(::GetImageUseCase)
-    // Explicit constructor call so the default Random is used.
     factory { GetRandomImagesUseCase(repository = get()) }
 }

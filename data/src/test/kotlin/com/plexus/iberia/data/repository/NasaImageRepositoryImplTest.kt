@@ -41,7 +41,7 @@ class NasaImageRepositoryImplTest {
 
         val page = repository.search(query = "aircraft", page = 1).first().getOrThrow()
 
-        assertEquals(2, page.images.size)
+        assertEquals(3, page.images.size)
     }
 
     @Test

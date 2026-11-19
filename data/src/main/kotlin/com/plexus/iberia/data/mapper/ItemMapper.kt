@@ -8,10 +8,11 @@ internal fun ItemDto.toNasaImage(): NasaImage? {
     val itemData = data?.firstOrNull() ?: return null
     val id = itemData.nasaId ?: return null
     val imageLinks = links.orEmpty()
+    val description = itemData.description.orEmpty().withoutHtml()
     return NasaImage(
         id = id,
-        title = itemData.title.orEmpty().withoutHtml(),
-        description = itemData.description.orEmpty().withoutHtml(),
+        title = completeTitle(title = itemData.title.orEmpty().withoutHtml(), description = description),
+        description = description,
         thumbnailUrl = imageLinks.thumbnailUrl(),
         imageUrl = imageLinks.largestImageUrl(),
         dateCreated = itemData.dateCreated.orEmpty(),

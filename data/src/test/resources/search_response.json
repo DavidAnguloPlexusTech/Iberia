@@ -27,6 +27,16 @@
       {
         "data": [ { "nasa_id": "NO-TITLE-1" } ],
         "links": []
+      },
+      {
+        "data": [
+          {
+            "nasa_id": "CUT-TITLE-1",
+            "title": "One of NASA Glenn's T-34C research aircraft is removed from t...",
+            "description": "One of NASA Glenn's T-34C research aircraft is removed from the hangar prior to a flight"
+          }
+        ],
+        "links": []
       }
     ],
     "metadata": { "total_hits": 10118 },

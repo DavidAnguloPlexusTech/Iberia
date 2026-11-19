@@ -17,7 +17,7 @@ class SearchResponseMapperTest {
     fun `skips items without nasa id`() {
         val page = response.toSearchPage()
 
-        assertEquals(listOf("GRC-2015-C-04751", "NO-TITLE-1"), page.images.map { it.id })
+        assertEquals(listOf("GRC-2015-C-04751", "NO-TITLE-1", "CUT-TITLE-1"), page.images.map { it.id })
     }
 
     @Test
@@ -31,7 +31,7 @@ class SearchResponseMapperTest {
 
     @Test
     fun `uses an empty title when it is missing`() {
-        val image = response.toSearchPage().images.last()
+        val image = response.toSearchPage().images.single { it.id == "NO-TITLE-1" }
 
         assertEquals("", image.title)
     }
@@ -64,4 +64,11 @@ class SearchResponseMapperTest {
         assertFalse(page.hasNextPage)
     }
 
+
+    @Test
+    fun `cut titles are restored from the description`() {
+        val image = response.toSearchPage().images.single { it.id == "CUT-TITLE-1" }
+
+        assertEquals("One of NASA Glenn's T-34C research aircraft is removed from the hangar prior to a flight", image.title)
+    }
 }
