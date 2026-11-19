@@ -22,7 +22,6 @@ internal fun SplashRoute(
     viewModel: SplashViewModel = koinViewModel(),
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    // Events are collected only while visible; Main.immediate handles them in the same frame.
     LaunchedEffect(viewModel, lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             withContext(Dispatchers.Main.immediate) {
@@ -37,7 +36,6 @@ internal fun SplashRoute(
     SplashScreen(onAnimationFinished = viewModel::onAnimationFinished)
 }
 
-/** Stateless: shows the pulsing NASA logo and reports when the animation ends. */
 @Composable
 internal fun SplashScreen(onAnimationFinished: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

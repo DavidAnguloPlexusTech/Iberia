@@ -46,7 +46,6 @@ internal fun DetailRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
-    // Events are collected only while visible; Main.immediate handles them in the same frame.
     LaunchedEffect(viewModel, lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             withContext(Dispatchers.Main.immediate) {
@@ -61,7 +60,6 @@ internal fun DetailRoute(
     DetailScreen(state = state, onRetry = viewModel::retry, onBackClick = viewModel::onBackClick)
 }
 
-/** Stateless: renders [state] and reports user actions through the callbacks. */
 @Composable
 internal fun DetailScreen(
     state: DetailState,
@@ -75,7 +73,6 @@ internal fun DetailScreen(
             paneTitle = screenTitle
             isTraversalGroup = true
         },
-        // Read first: the back button comes before the content.
         topBar = { DetailTopBar(onBackClick = onBackClick, modifier = Modifier.semantics { traversalIndex = -1f }) },
     ) { innerPadding ->
         DetailContent(

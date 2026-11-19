@@ -9,7 +9,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.plexus.iberia.ui.R
 
-/** Space Grotesk is a variable font: every weight comes from the same file. */
 private val SpaceGrotesk = FontFamily(
     spaceGroteskFont(FontWeight.Normal),
     spaceGroteskFont(FontWeight.Medium),
@@ -25,7 +24,6 @@ private fun spaceGroteskFont(weight: FontWeight) = Font(
 
 private val baseline = Typography()
 
-/** Material type scale with Space Grotesk; titles get bold weights and wide tracking. */
 internal val IberiaTypography = Typography(
     displaySmall = baseline.displaySmall.spaceGrotesk(FontWeight.Bold, letterSpacing = 1.5),
     headlineMedium = baseline.headlineMedium.spaceGrotesk(FontWeight.Bold, letterSpacing = 1.0),

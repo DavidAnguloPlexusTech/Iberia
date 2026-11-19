@@ -35,10 +35,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * Switch Access moves between actionable elements and selects them, like a keyboard does with
- * focus and Enter: every stop must have a name, and every control must work without touch.
- */
 class SwitchAccessTest {
 
     @get:Rule
@@ -67,7 +63,6 @@ class SwitchAccessTest {
             }
         }
 
-        // Only the back button is actionable; texts are read but never scanned as switch stops.
         composeRule.onAllNodes(hasClickAction()).assertCountEquals(1)
         composeRule.onNodeWithContentDescription("Back").assertExists()
     }
@@ -169,7 +164,6 @@ class SwitchAccessTest {
     fun eachResultIsASingleStop() {
         setSwitchContent { IberiaTheme { HomeScreenWith(HomeState(query = "apollo", images = PreviewData.images)) } }
 
-        // Thumbnail and texts are merged: one actionable node per result, no inner stops.
         val results = composeRule.onAllNodesWithContentDescription("Learjet", substring = true).fetchSemanticsNodes()
         assertTrue(results.isNotEmpty())
         results.forEach { node -> assertTrue(node.config.contains(SemanticsActions.OnClick)) }

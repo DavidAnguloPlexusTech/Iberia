@@ -15,7 +15,6 @@ import com.plexus.iberia.ui.common.components.LoadingAnimation
 import com.plexus.iberia.ui.common.toMessage
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** End of the list: loader while the next page arrives, or retry if it failed. */
 @Composable
 internal fun ImageListFooter(
     isLoading: Boolean,

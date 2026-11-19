@@ -34,7 +34,6 @@ import com.plexus.iberia.ui.common.toAccessibleDate
 import com.plexus.iberia.ui.common.toDisplayDate
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** One search result: thumbnail, title and where/when it was taken. */
 @Composable
 internal fun ImageListItem(
     image: NasaImage,
@@ -55,7 +54,6 @@ internal fun ImageListItem(
                 role = Role.Button,
                 onClick = onClick,
             )
-            // The whole row is read as one item, with the date said in words instead of digits.
             .clearAndSetSemantics { contentDescription = description }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -81,7 +79,6 @@ private fun NasaImage.accessibleDescription(): String = listOfNotNull(
 
 @Composable
 private fun ImageListItemTexts(image: NasaImage, modifier: Modifier = Modifier) {
-    // No max lines: with large fonts the title wraps instead of being cut.
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = image.title,

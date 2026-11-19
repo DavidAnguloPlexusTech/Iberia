@@ -1,13 +1,11 @@
 name: Build
 
-# Checks that the app compiles in debug and in release (release also runs R8).
 on:
   push:
     branches: [main, develop, 'feature/**', 'fix/**', 'release/**']
   pull_request:
     branches: [main, develop]
 
-# A newer push to the same branch cancels the run that is still in progress.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -30,7 +28,6 @@ jobs:
           distribution: temurin
           java-version: 25
 
-      # Caches Gradle and validates the Gradle wrapper checksum.
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 

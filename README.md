@@ -1,6 +1,6 @@
 # Iberia · NASA Space Explorer
 
-App Android nativa, hecha con **Kotlin** y **Jetpack Compose**, que busca y muestra imágenes de la **API pública de la NASA**. Es una prueba técnica: el objetivo es demostrar buenas prácticas de arquitectura, concurrencia, cancelación, caché y testing, con una app sencilla, clara y accesible.
+App Android nativa, hecha con **Kotlin** y **Jetpack Compose**, que busca y muestra imágenes de la **API pública de la NASA**.
 
 ---
 
@@ -18,8 +18,7 @@ App Android nativa, hecha con **Kotlin** y **Jetpack Compose**, que busca y mues
 10. [Stack y versiones](#10-stack-y-versiones)
 11. [Estructura del proyecto](#11-estructura-del-proyecto)
 12. [Flujo de trabajo con Git](#12-flujo-de-trabajo-con-git)
-13. [Limitaciones y mejoras futuras](#13-limitaciones-y-mejoras-futuras)
-14. [Licencias y créditos](#14-licencias-y-créditos)
+13. [Licencias y créditos](#13-licencias-y-créditos)
 
 ---
 
@@ -54,7 +53,7 @@ Además:
 
 - **Sin API key.** El proyecto se ejecuta tal cual, sin configurar claves.
 - **Buscador real, paginación e imágenes,** que es justo lo que necesita una app de búsqueda, lista y detalle.
-- **Contenido con imagen,** que encaja con la temática aeroespacial de la prueba.
+- **Contenido visual y aeroespacial,** con miles de fotografías.
 
 Endpoints que usa la app:
 
@@ -171,7 +170,7 @@ Los componentes reutilizables viven cada uno en su propio archivo, en `component
 
 ### 5.1 Cancelación
 
-Es el punto que el enunciado valora especialmente. Se resuelve en varias capas:
+Se resuelve en varias capas:
 
 1. **Debounce.** `HomeViewModel` espera 400 ms sin cambios antes de buscar (`debounce`) e ignora textos repetidos (`distinctUntilChanged`). Escribir "apollo" letra a letra lanza **una** búsqueda, no seis.
 2. **Cancelación explícita.** Cada carga se lanza en un `Job` (`loadJob`). Antes de empezar una nueva, el anterior se cancela con `loadJob?.cancel()`. Así, los resultados de una búsqueda vieja **nunca pueden sobrescribir** los de una más nueva, aunque la vieja responda después.
@@ -180,7 +179,7 @@ Es el punto que el enunciado valora especialmente. Se resuelve en varias capas:
 
 ### 5.2 Caché
 
-Cumple los tres puntos del enunciado, **en memoria**:
+Caché **en memoria**:
 
 | Situación | Qué pasa |
 |---|---|
@@ -202,7 +201,7 @@ Está en dos sitios de `data`:
 **Dónde vive:** en la memoria del proceso, en una única instancia (`single` de Koin) compartida por toda la app.
 
 - **Sobrevive** a cambiar de pantalla y a rotar el móvil.
-- **Se pierde** al cerrar la app; el enunciado indica que la memoria es suficiente.
+- **Se pierde** al cerrar la app.
 - **Lo que guarda** son los datos de la búsqueda; las fotos las cachea aparte Coil, en memoria y en disco.
 
 **Extra:** el detalle de una imagen que ya está en una página cacheada se abre **sin petición de red** (`SearchCache.findImage`).
@@ -264,7 +263,7 @@ Gson, con DTOs `internal`, todos los campos nullables (Gson no respeta la null-s
 | `ApiCallTest` (5) | Conversión de excepciones a `DomainError`, y que la cancelación no se pierde. |
 | `SearchResponseMapperTest` (8), `TitleMapperTest` (5), `HtmlMapperTest` (4) | Mapeo de la respuesta, títulos cortados y limpieza de HTML. |
 
-### Presentation (opcionales en el enunciado)
+### Presentation
 
 | Clase | Qué comprueba |
 |---|---|
@@ -399,19 +398,8 @@ Cada rama se integra en `develop` con `merge --no-ff`, para que el historial mue
 
 ---
 
-## 13. Limitaciones y mejoras futuras
-
-- **Caché en disco:** la caché vive solo en memoria. Room permitiría conservar los resultados al cerrar la app; el enunciado lo marca como opcional.
-- **Foco al volver del detalle:** con teclado o Switch Access, el foco vuelve al principio de la lista en lugar de al resultado que se abrió.
-- **Doble splash:** en Android 12+ aparece la splash del sistema antes de la propia; se resolvería con `androidx.core:core-splashscreen`.
-- **Tests de UI en CI:** los 27 tests de accesibilidad necesitan un emulador; ahora se ejecutan en local.
-- **Firma de release:** la build de release no está firmada para publicar en tiendas.
-- **Títulos repetidos:** algunas imágenes de la NASA tienen exactamente el mismo título y fecha, y en la lista no se distinguen.
-
----
-
-## 14. Licencias y créditos
+## 13. Licencias y créditos
 
 - **Datos e imágenes:** [NASA Image and Video Library](https://images.nasa.gov/). El contenido de la NASA es, en general, de dominio público; consulta sus [normas de uso](https://www.nasa.gov/nasa-brand-center/images-and-media/).
-- **Logo de la NASA:** marca protegida de la NASA, usada aquí únicamente con fines de demostración en esta prueba técnica. No indica ninguna relación ni respaldo de la NASA y habría que sustituirlo antes de publicar la app.
+- **Logo de la NASA:** marca protegida de la NASA. Su uso aquí no indica ninguna relación ni respaldo de la NASA y habría que sustituirlo antes de publicar la app.
 - **Fuente:** [Space Grotesk](https://github.com/floriankarsten/space-grotesk), con licencia SIL Open Font License 1.1 (ver `licenses/SpaceGrotesk-OFL.txt`).

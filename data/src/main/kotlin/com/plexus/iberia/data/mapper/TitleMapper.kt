@@ -3,11 +3,6 @@ package com.plexus.iberia.data.mapper
 private val TRUNCATION_MARKS = listOf("...", "…")
 private const val SENTENCE_END = ". "
 
-/**
- * The API cuts some long titles, such as "One of NASA Glenn's T-34C research aircraft is removed from t...",
- * and the full sentence is the beginning of the description. Restores it so no information is lost;
- * any other title is returned unchanged.
- */
 internal fun completeTitle(title: String, description: String): String {
     val visiblePart = title.withoutTruncationMark() ?: return title
     if (visiblePart.isEmpty() || !description.startsWith(visiblePart)) return title

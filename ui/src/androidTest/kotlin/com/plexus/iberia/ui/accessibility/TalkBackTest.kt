@@ -26,7 +26,6 @@ import com.plexus.iberia.ui.theme.IberiaTheme
 import org.junit.Rule
 import org.junit.Test
 
-/** What TalkBack reads: one node per item, headings, grouped info, live regions and screen titles. */
 class TalkBackTest {
 
     @get:Rule

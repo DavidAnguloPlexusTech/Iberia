@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 
-/** Remote image with a neutral placeholder while it loads or when it fails. */
 @Composable
 internal fun NasaAsyncImage(
     url: String?,

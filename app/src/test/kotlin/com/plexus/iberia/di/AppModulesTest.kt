@@ -7,7 +7,6 @@ import org.koin.test.verify.verify
 
 class AppModulesTest {
 
-    /** Types provided at runtime as ViewModel parameters. */
     private val extraTypes = listOf(String::class)
 
     @OptIn(KoinExperimentalAPI::class)

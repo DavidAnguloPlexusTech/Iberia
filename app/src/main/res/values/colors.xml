@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Same as the Compose theme background, so there is no flash when the app starts. -->
     <color name="window_background">#FFF4EBDC</color>
 </resources>

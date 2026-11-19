@@ -64,7 +64,6 @@ class SearchResponseMapperTest {
         assertFalse(page.hasNextPage)
     }
 
-
     @Test
     fun `cut titles are restored from the description`() {
         val image = response.toSearchPage().images.single { it.id == "CUT-TITLE-1" }
