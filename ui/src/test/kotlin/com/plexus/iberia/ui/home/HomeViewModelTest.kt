@@ -72,11 +72,11 @@ class HomeViewModelTest {
 
     @Test
     fun `exposes the error when the search fails`() = runTest {
-        repository.searchResults = { Result.failure(DomainError.Network) }
+        repository.searchResults = { Result.failure(DomainError.Network()) }
         viewModel.onQueryChange("apollo")
         advanceUntilIdle()
 
-        assertEquals(DomainError.Network, viewModel.state.value.error)
+        assertTrue(viewModel.state.value.error is DomainError.Network)
         assertFalse(viewModel.state.value.isLoading)
     }
 
@@ -107,7 +107,7 @@ class HomeViewModelTest {
 
     @Test
     fun `retry repeats the failed first page`() = runTest {
-        repository.searchResults = { Result.failure(DomainError.Network) }
+        repository.searchResults = { Result.failure(DomainError.Network()) }
         searchFor("apollo")
         repository.searchResults = { Result.success(searchPage(it)) }
         viewModel.retry()
@@ -120,7 +120,7 @@ class HomeViewModelTest {
     @Test
     fun `retry repeats the failed next page`() = runTest {
         searchFor("apollo")
-        repository.searchResults = { Result.failure(DomainError.Network) }
+        repository.searchResults = { Result.failure(DomainError.Network()) }
         viewModel.loadNextPage()
         advanceUntilIdle()
         repository.searchResults = { Result.success(searchPage(it)) }
@@ -165,10 +165,10 @@ class HomeViewModelTest {
 
     @Test
     fun `retry repeats the failed random page`() = runTest {
-        repository.searchResults = { Result.failure(DomainError.Network) }
+        repository.searchResults = { Result.failure(DomainError.Network()) }
         viewModel
         advanceUntilIdle()
-        assertEquals(DomainError.Network, viewModel.state.value.error)
+        assertTrue(viewModel.state.value.error is DomainError.Network)
         repository.searchResults = { Result.success(searchPage(it)) }
         viewModel.retry()
         advanceUntilIdle()

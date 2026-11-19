@@ -1,7 +1,10 @@
 package com.plexus.iberia.ui.accessibility
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -41,9 +44,11 @@ class SwitchAccessTest {
     @get:Rule
     val composeRule = createComposeRule()
 
+    private lateinit var inputModeManager: InputModeManager
+
     @Test
     fun everyActionableElementOfHomeHasAName() {
-        composeRule.setContent { IberiaTheme { HomeScreenWith(HomeState(query = "apollo", images = PreviewData.images)) } }
+        setSwitchContent { IberiaTheme { HomeScreenWith(HomeState(query = "apollo", images = PreviewData.images)) } }
 
         val actionable = composeRule.onAllNodes(hasClickAction()).fetchSemanticsNodes()
         assertTrue(actionable.isNotEmpty())
@@ -56,7 +61,7 @@ class SwitchAccessTest {
 
     @Test
     fun detailContentIsNotAnExtraStop() {
-        composeRule.setContent {
+        setSwitchContent {
             IberiaTheme {
                 DetailScreen(state = DetailState(image = PreviewData.image, isLoading = false), onRetry = {}, onBackClick = {})
             }
@@ -70,7 +75,7 @@ class SwitchAccessTest {
     @Test
     fun listItemOpensWithTheSelectKey() {
         var opened = false
-        composeRule.setContent { IberiaTheme { ImageListItem(image = PreviewData.image, onClick = { opened = true }) } }
+        setSwitchContent { IberiaTheme { ImageListItem(image = PreviewData.image, onClick = { opened = true }) } }
 
         composeRule.onNode(hasClickAction()).selectWithKeyboard()
 
@@ -80,7 +85,7 @@ class SwitchAccessTest {
     @Test
     fun retryWorksWithTheSelectKey() {
         var retried = false
-        composeRule.setContent { IberiaTheme { ErrorMessage(message = "Error", onRetry = { retried = true }) } }
+        setSwitchContent { IberiaTheme { ErrorMessage(message = "Error", onRetry = { retried = true }) } }
 
         composeRule.onNodeWithText("Retry").selectWithKeyboard()
 
@@ -90,7 +95,7 @@ class SwitchAccessTest {
     @Test
     fun clearSearchWorksWithTheSelectKey() {
         var query = "apollo"
-        composeRule.setContent { IberiaTheme { SearchBar(query = query, onQueryChange = { query = it }) } }
+        setSwitchContent { IberiaTheme { SearchBar(query = query, onQueryChange = { query = it }) } }
 
         composeRule.onNodeWithContentDescription("Clear search").selectWithKeyboard()
 
@@ -100,7 +105,7 @@ class SwitchAccessTest {
     @Test
     fun backWorksWithTheSelectKey() {
         var wentBack = false
-        composeRule.setContent {
+        setSwitchContent {
             IberiaTheme {
                 DetailScreen(
                     state = DetailState(image = PreviewData.image, isLoading = false),
@@ -119,7 +124,7 @@ class SwitchAccessTest {
     fun scrollingTheListWithoutGesturesLoadsTheNextPage() {
         var nextPageRequests = 0
         val images = List(30) { PreviewData.image.copy(id = "id-$it") }
-        composeRule.setContent {
+        setSwitchContent {
             IberiaTheme {
                 ImageList(
                     images = images,
@@ -141,12 +146,12 @@ class SwitchAccessTest {
     @Test
     fun errorInsideTheListCanBeRetriedWithoutTouch() {
         var retried = false
-        composeRule.setContent {
+        setSwitchContent {
             IberiaTheme {
                 ImageList(
                     images = PreviewData.images,
                     isLoadingNextPage = false,
-                    error = DomainError.Network,
+                    error = DomainError.Network(),
                     onImageClick = {},
                     onLoadNextPage = {},
                     onRetry = { retried = true },
@@ -162,7 +167,7 @@ class SwitchAccessTest {
 
     @Test
     fun eachResultIsASingleStop() {
-        composeRule.setContent { IberiaTheme { HomeScreenWith(HomeState(query = "apollo", images = PreviewData.images)) } }
+        setSwitchContent { IberiaTheme { HomeScreenWith(HomeState(query = "apollo", images = PreviewData.images)) } }
 
         // Thumbnail and texts are merged: one actionable node per result, no inner stops.
         val results = composeRule.onAllNodesWithContentDescription("Learjet", substring = true).fetchSemanticsNodes()
@@ -170,8 +175,15 @@ class SwitchAccessTest {
         results.forEach { node -> assertTrue(node.config.contains(SemanticsActions.OnClick)) }
     }
 
-    /** Moves focus to the element and presses Enter, as a switch or keyboard does. */
+    private fun setSwitchContent(content: @Composable () -> Unit) {
+        composeRule.setContent {
+            inputModeManager = LocalInputModeManager.current
+            content()
+        }
+    }
+
     private fun SemanticsNodeInteraction.selectWithKeyboard() {
+        composeRule.runOnIdle { inputModeManager.requestInputMode(InputMode.Keyboard) }
         performSemanticsAction(SemanticsActions.RequestFocus)
         performKeyInput { pressKey(Key.Enter) }
     }

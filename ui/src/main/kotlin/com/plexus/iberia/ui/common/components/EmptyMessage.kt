@@ -18,7 +18,6 @@ import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.unit.dp
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** Centered message for screens without content, with an optional title. */
 @Composable
 internal fun EmptyMessage(
     message: String,

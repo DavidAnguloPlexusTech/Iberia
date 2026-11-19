@@ -25,7 +25,6 @@ import com.plexus.iberia.ui.R
 import com.plexus.iberia.ui.common.focusBorder
 import com.plexus.iberia.ui.theme.IberiaTheme
 
-/** Error text with a retry button. */
 @Composable
 internal fun ErrorMessage(
     message: String,

@@ -15,6 +15,5 @@ internal fun SearchResponseDto.toSearchPage(): SearchPage = SearchPage(
 
 private fun List<PageLinkDto>.hasNext(): Boolean = any { it.rel == REL_NEXT }
 
-/** Throws [DomainError.NotFound] when the response has no valid image. */
 internal fun SearchResponseDto.firstImage(): NasaImage =
-    toSearchPage().images.firstOrNull() ?: throw DomainError.NotFound
+    toSearchPage().images.firstOrNull() ?: throw DomainError.NotFound()

@@ -5,7 +5,6 @@ import retrofit2.HttpException
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
-/** Runs a network call and turns any failure into a [DomainError]. */
 internal suspend fun <T> apiCall(block: suspend () -> T): Result<T> =
     try {
         Result.success(block())
@@ -16,7 +15,7 @@ internal suspend fun <T> apiCall(block: suspend () -> T): Result<T> =
     }
 
 internal fun Exception.toDomainError(): DomainError = when (this) {
-    is IOException -> DomainError.Network
+    is IOException -> DomainError.Network()
     is HttpException -> DomainError.Server(code())
-    else -> DomainError.Unknown
+    else -> DomainError.Unknown()
 }

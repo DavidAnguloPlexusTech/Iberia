@@ -4,6 +4,7 @@ import com.plexus.iberia.domain.error.DomainError
 import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
@@ -19,7 +20,7 @@ class ApiCallTest {
 
     @Test
     fun `maps connection errors to Network`() = runTest {
-        assertEquals(DomainError.Network, failureOf { throw IOException() })
+        assertTrue(failureOf { throw IOException() } is DomainError.Network)
     }
 
     @Test
@@ -31,7 +32,7 @@ class ApiCallTest {
 
     @Test
     fun `maps anything else to Unknown`() = runTest {
-        assertEquals(DomainError.Unknown, failureOf { throw IllegalStateException() })
+        assertTrue(failureOf { throw IllegalStateException() } is DomainError.Unknown)
     }
 
     @Test(expected = CancellationException::class)
