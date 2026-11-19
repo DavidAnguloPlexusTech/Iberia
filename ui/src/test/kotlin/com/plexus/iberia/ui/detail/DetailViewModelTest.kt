@@ -45,16 +45,16 @@ class DetailViewModelTest {
 
     @Test
     fun `exposes the error when loading fails`() = runTest {
-        repository.imageResult = Result.failure(DomainError.NotFound)
+        repository.imageResult = Result.failure(DomainError.NotFound())
         viewModel
         advanceUntilIdle()
 
-        assertEquals(DomainError.NotFound, viewModel.state.value.error)
+        assertTrue(viewModel.state.value.error is DomainError.NotFound)
     }
 
     @Test
     fun `retry loads the image again`() = runTest {
-        repository.imageResult = Result.failure(DomainError.Network)
+        repository.imageResult = Result.failure(DomainError.Network())
         viewModel
         advanceUntilIdle()
         repository.imageResult = Result.success(image("GRC-1"))

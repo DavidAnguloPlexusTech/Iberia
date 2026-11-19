@@ -143,7 +143,7 @@ class TalkBackTest {
         composeRule.setContent {
             IberiaTheme {
                 DetailScreen(
-                    state = DetailState(isLoading = false, error = DomainError.Network),
+                    state = DetailState(isLoading = false, error = DomainError.Network()),
                     onRetry = {},
                     onBackClick = {},
                 )

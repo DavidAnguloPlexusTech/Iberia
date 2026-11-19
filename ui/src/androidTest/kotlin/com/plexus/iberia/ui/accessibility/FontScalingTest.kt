@@ -90,7 +90,7 @@ class FontScalingTest {
             // The large search field leaves little room: the message and its button need scrolling.
             Box(Modifier.height(360.dp)) {
                 HomeScreen(
-                    state = HomeState(error = DomainError.Network),
+                    state = HomeState(error = DomainError.Network()),
                     onQueryChange = {},
                     onLoadNextPage = {},
                     onRetry = {},

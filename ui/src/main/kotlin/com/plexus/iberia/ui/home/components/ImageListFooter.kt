@@ -35,5 +35,5 @@ internal fun ImageListFooter(
 @Preview(showBackground = true)
 @Composable
 private fun ImageListFooterErrorPreview() {
-    IberiaTheme { ImageListFooter(isLoading = false, error = DomainError.Network, onRetry = {}) }
+    IberiaTheme { ImageListFooter(isLoading = false, error = DomainError.Network(), onRetry = {}) }
 }

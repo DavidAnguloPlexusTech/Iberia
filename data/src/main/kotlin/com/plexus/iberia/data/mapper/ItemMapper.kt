@@ -3,7 +3,6 @@ package com.plexus.iberia.data.mapper
 import com.plexus.iberia.data.remote.dto.ItemDto
 import com.plexus.iberia.domain.model.NasaImage
 
-/** Returns null when the item has no id: without it the image cannot be identified or opened. */
 internal fun ItemDto.toNasaImage(): NasaImage? {
     val itemData = data?.firstOrNull() ?: return null
     val id = itemData.nasaId ?: return null
