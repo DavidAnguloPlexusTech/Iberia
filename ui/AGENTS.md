@@ -97,7 +97,11 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 - **`MainDispatcherRule`** sustituye `Dispatchers.Main` por un `StandardTestDispatcher`.
 - **Tiempo virtual:** `advanceTimeBy(SEARCH_DEBOUNCE)` y `advanceUntilIdle()`.
 - **Eventos:** con Turbine (`events.test { ... awaitItem() }`).
-- **`FakeNasaImageRepository`:** registra las búsquedas y permite configurar resultados y retrasos.
+- **Mockito:**
+  - El repositorio se simula con `mock()`.
+  - En `@Before`, `whenever(...).thenAnswer { flow { delay(...); emit(...) } }` simula resultados por página y retrasos, con variables del test (`searchResults`, `responseDelay`, `imageResult`).
+  - Las búsquedas realizadas se leen con `mockingDetails(repository).invocations` (helper `searches()` en `HomeViewModelTest`), y las llamadas concretas se comprueban con `verify`.
+- **Datos de ejemplo:** `image()` y `searchPage()` están en `TestData.kt`.
 - **Ojo:** los ViewModels se crean con `by lazy`; tócalos (`viewModel`) antes de avanzar el tiempo si el test depende de su `init`.
 
 ```bash

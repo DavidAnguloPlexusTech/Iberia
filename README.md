@@ -243,15 +243,15 @@ Gson, con DTOs `internal`, todos los campos nullables (Gson no respeta la null-s
 
 ## 6. Tests
 
-**83 tests unitarios** y **27 tests de UI**. Los unitarios usan dobles de test propios (*fakes*, sin librerías de mocks), corrutinas de test con tiempo virtual y MockWebServer.
+**85 tests unitarios** y **27 tests de UI**. Los unitarios usan **Mockito** (con `mockito-kotlin`) para simular el repositorio en domain y presentación, **kotlinx-coroutines-test** para las corrutinas con tiempo virtual, y **MockWebServer** para probar la red real en data.
 
 ### Domain: casos de uso con repositorios simulados
 
 | Clase | Qué comprueba |
 |---|---|
-| `SearchImagesUseCaseTest` (3) | Limpia los espacios de la búsqueda, empieza en la página 1 y devuelve lo que da el repositorio. |
+| `SearchImagesUseCaseTest` (3) | Limpia los espacios de la búsqueda, pide la página indicada y devuelve lo que da el repositorio (`verify` sobre el mock). |
 | `GetRandomImagesUseCaseTest` (5) | Temas y página de inicio válidos, tema distinto en cada página, cambio de vuelta y feed sin fin. |
-| `GetImageUseCaseTest` (1) | Pide la imagen del id indicado. |
+| `GetImageUseCaseTest` (2) | Pide la imagen del id indicado y propaga los errores del repositorio. |
 
 ### Data: caché, red y mappers
 
@@ -268,7 +268,7 @@ Gson, con DTOs `internal`, todos los campos nullables (Gson no respeta la null-s
 | Clase | Qué comprueba |
 |---|---|
 | `HomeViewModelTest` (15) | Debounce, **solo se busca la última consulta al escribir rápido**, estado de carga, errores, reintentos, paginación, feed aleatorio y navegación. |
-| `DetailViewModelTest` (5) | Carga, error, reintento y volver atrás. |
+| `DetailViewModelTest` (6) | Pide la imagen de su id, carga, error, reintento y volver atrás. |
 | `SplashViewModelTest` (1), `DateFormattingTest` (3) | Navegación desde la Splash y formato de fechas. |
 | `AppModulesTest` (1) | Grafo de Koin completo. |
 
@@ -350,7 +350,7 @@ Minimalista, inspirado en el **pop de la era espacial** de los años 60:
 | Asincronía | Coroutines y Flow 1.11.0 |
 | Red | Retrofit 3.0.0, OkHttp 5.5.1, Gson |
 | Imágenes | Coil 3.6.3 |
-| Tests | JUnit 4, kotlinx-coroutines-test, Turbine 1.2.1, MockWebServer, Compose UI Test, Espresso 3.7.0 |
+| Tests | JUnit 4, kotlinx-coroutines-test, Mockito 5.24.0 + mockito-kotlin 6.4.0, Turbine 1.2.1, MockWebServer, Compose UI Test, Espresso 3.7.0 |
 | Build | Gradle 9.9.1, AGP 9.5.1, catálogo de versiones (`gradle/libs.versions.toml`) |
 | SDK | `minSdk` 24 · `targetSdk` y `compileSdk` 37 |
 

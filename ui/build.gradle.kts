@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
+
 android {
     namespace = "com.plexus.iberia.ui"
     compileSdk {
@@ -23,6 +25,15 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    testOptions {
+        unitTests.all { test ->
+            val mockitoAgentJar = files(mockitoAgent)
+            test.jvmArgumentProviders.add(
+                CommandLineArgumentProvider { listOf("-javaagent:${mockitoAgentJar.singleFile.absolutePath}") },
+            )
+        }
     }
 }
 
@@ -48,6 +59,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    mockitoAgent(libs.mockito.core) { isTransitive = false }
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

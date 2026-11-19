@@ -15,6 +15,8 @@ kotlin {
     }
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencies {
     api(libs.kotlinx.coroutines.core)
 
@@ -23,4 +25,12 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    mockitoAgent(libs.mockito.core) { isTransitive = false }
+}
+
+tasks.test {
+    val mockitoAgentJar = files(mockitoAgent)
+    jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-javaagent:${mockitoAgentJar.singleFile.absolutePath}") })
 }

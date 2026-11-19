@@ -49,7 +49,12 @@ di/           domainModule
 ## Tests (`src/test`)
 
 - **JUnit 4 + `kotlinx-coroutines-test`** (`runTest`). Los Flow se leen con `.first()`.
-- **Repositorios falsos (fakes):** clases privadas que implementan `NasaImageRepository` dentro del test, sin librerías de mocks. Los métodos que el test no usa devuelven `error("Not used")`.
+- **Mockito con `mockito-kotlin`:**
+  - Se simula el repositorio con `private val repository: NasaImageRepository = mock()`.
+  - Las respuestas se configuran con `whenever(repository.search(any(), any())).thenReturn(flowOf(...))`.
+  - Las llamadas se comprueban con `verify(repository).search(query = ..., page = ...)`, o con `inOrder` si importa el orden.
+  - No escribas fakes a mano.
+- **Agente de Mockito:** se carga con `-javaagent` desde la configuración `mockitoAgent` de `build.gradle.kts`, de forma perezosa y compatible con la caché de configuración. Si añades tests en otro módulo con Mockito, replica esa configuración.
 - **Aleatoriedad:** se prueba con `Random(semilla)` fija.
 - **Nombres:** frases entre backticks: ``fun `trims the query before searching`()``.
 
