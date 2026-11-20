@@ -2,6 +2,7 @@ package com.plexus.iberia.ui.home
 
 import app.cash.turbine.test
 import com.plexus.iberia.domain.error.DomainError
+import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.model.SearchPage
 import com.plexus.iberia.domain.repository.NasaImageRepository
 import com.plexus.iberia.domain.usecase.GetRandomImagesUseCase
@@ -122,7 +123,8 @@ class HomeViewModelTest {
         advanceTimeBy(300.milliseconds)
         runCurrent()
 
-        assertNotEquals(pageOf("apollo").images, viewModel.state.value.images)
+        assertEquals(emptyList<NasaImage>(), viewModel.state.value.images)
+        assertTrue(viewModel.state.value.isLoading)
         advanceUntilIdle()
         assertEquals(pageOf("mars").images, viewModel.state.value.images)
     }
@@ -142,6 +144,18 @@ class HomeViewModelTest {
 
         assertEquals(pageOf("apollo").images, viewModel.state.value.images)
         assertFalse(viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun `a new query hides the previous results while it waits for the debounce`() = runTest {
+        searchFor("apollo")
+
+        viewModel.onQueryChange("mars")
+
+        assertEquals(emptyList<NasaImage>(), viewModel.state.value.images)
+        assertTrue(viewModel.state.value.isLoading)
+        assertEquals("mars", viewModel.state.value.query)
+        assertEquals(listOf("apollo" to 1), searches())
     }
 
     @Test
@@ -279,6 +293,16 @@ class HomeViewModelTest {
         viewModel.events.test {
             viewModel.onImageClick("GRC-1")
 
+            assertEquals(HomeEvent.NavigateToDetail("GRC-1"), awaitItem())
+        }
+    }
+
+    @Test
+    fun `a navigation sent while nobody collects arrives once collection starts`() = runTest {
+        viewModel.onImageClick("GRC-1")
+        runCurrent()
+
+        viewModel.events.test {
             assertEquals(HomeEvent.NavigateToDetail("GRC-1"), awaitItem())
         }
     }

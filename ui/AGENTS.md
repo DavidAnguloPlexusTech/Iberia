@@ -33,10 +33,10 @@ di/                       uiModule
 2. `internal sealed interface XEvent`: eventos de un solo uso (navegación).
 3. `internal class XViewModel(...) : ViewModel()`, que contiene:
    - **Estado:** `private val _state = MutableStateFlow(XState())` y `val state: StateFlow<XState> = _state.asStateFlow()`.
-   - **Eventos:** `private val _events = MutableSharedFlow<XEvent>()` y `val events: SharedFlow<XEvent> = _events.asSharedFlow()`.
+   - **Eventos:** `private val _events = Channel<XEvent>(Channel.BUFFERED)` y `val events: Flow<XEvent> = _events.receiveAsFlow()`. No uses `MutableSharedFlow`: sin colector activo descarta el evento.
    - **Cambios de estado** solo con `_state.update { it.copy(campoQueCambia = ...) }`, sin funciones ni archivos aparte para actualizar el estado.
    - **Una función pública por acción** del usuario (`onQueryChange`, `retry`, `onBackClick`…). Nada de `Intent` ni `onIntent`: es MVVM, no MVI.
-   - **Corrutinas** en `viewModelScope`. Los eventos se emiten con `viewModelScope.launch { _events.emit(...) }`.
+   - **Corrutinas** en `viewModelScope`. Los eventos se envían con `viewModelScope.launch { _events.send(...) }`.
 
 **`XScreen.kt`:**
 
@@ -51,7 +51,7 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 `HomeViewModel` es la pieza con más lógica:
 
 - **Búsqueda:** `queries` (`MutableStateFlow`) → `debounce(SEARCH_DEBOUNCE)` (400 ms) → `trim` → `onQuerySettled`, que solo busca si el texto cambió o si la búsqueda anterior se canceló.
-- **Cancelación:** cada carga se lanza en `loadJob`. `onQueryChange` la cancela en cuanto el texto cambia, sin esperar al debounce, y `load()` la cancela antes de cada carga nueva. Así una búsqueda vieja nunca llega a mostrarse. Mantén este patrón en cualquier carga nueva.
+- **Cancelación:** cada carga se lanza en `loadJob`. `onQueryChange` la cancela en cuanto el texto cambia, sin esperar al debounce, y vacía la lista mostrando el estado de carga (salvo que solo cambien espacios), y `load()` la cancela antes de cada carga nueva. Así una búsqueda vieja nunca llega a mostrarse. Mantén este patrón en cualquier carga nueva.
 - **Dos fuentes, un solo camino:** con texto se usa `SearchImagesUseCase` y sin texto el feed aleatorio (`GetRandomImagesUseCase`), las dos con la misma paginación.
 - **Paginación:** la lista (`ImageList`) observa el scroll con `snapshotFlow` y llama a `loadNextPage()` cuando faltan 5 elementos. El ViewModel ignora la llamada si `canLoadNextPage` es falso. Al añadir páginas se eliminan ids repetidos, porque `LazyColumn` usa el id como clave.
 

@@ -103,4 +103,14 @@ class DetailViewModelTest {
             assertEquals(DetailEvent.NavigateBack, awaitItem())
         }
     }
+
+    @Test
+    fun `a navigation sent while nobody collects arrives once collection starts`() = runTest {
+        viewModel.onBackClick()
+        runCurrent()
+
+        viewModel.events.test {
+            assertEquals(DetailEvent.NavigateBack, awaitItem())
+        }
+    }
 }
