@@ -44,7 +44,7 @@ di/           domainModule
 - **Modelos:** `data class` inmutables, sin campos nulos salvo que el dato sea opcional de verdad (como `photographer` o las URLs de imagen). Los nulos de la API se resuelven en los mappers de `data`.
 - **Sin hilos:** nada de `Dispatchers` ni decisiones de hilos aquí. `domain` no sabe en qué hilo corre; eso lo decide `data`.
 - **Sin caché:** `domain` no conoce la caché. Es un detalle de `data`.
-- **DI:** registra cada caso de uso en `di/DomainModule.kt`. Usa `factoryOf(::X)`; si el constructor tiene valores por defecto que deben usarse (como `Random.Default`), usa `factory { X(repository = get()) }`.
+- **DI:** registra cada caso de uso en `di/DomainModule.kt` con lambda y argumentos con nombre: `factory { X(repository = get()) }`. Los valores por defecto (como `Random.Default`) no se pasan.
 
 ## Tests (`src/test`)
 

@@ -73,12 +73,12 @@ Convierten a dominio y limpian los datos. Son funciones de extensión `internal`
 ## Hilos
 
 - **El repositorio decide el hilo:** cada `Flow` termina en `.flowOn(ioDispatcher)`, así que la red y el mapeo nunca van por el hilo principal.
-- **Dispatcher por constructor:** `ioDispatcher` se recibe con `Dispatchers.IO` por defecto. Por eso en Koin se registra con lambda, no con `singleOf`.
+- **Dispatcher por constructor:** `ioDispatcher` se recibe con `Dispatchers.IO` por defecto. En Koin no se pasa, así se usa el valor por defecto.
 
 ## DI (`di/`)
 
 - **`networkModule`** (`internal`): OkHttp, Retrofit y `NasaApi` como `single`.
-- **`dataModule`:** `includes(networkModule)`, `NasaRemoteDataSource` (`factoryOf`), `SearchCache` (`single`) y el repositorio (`single<NasaImageRepository> { ... }`).
+- **`dataModule`:** `includes(networkModule)`, `factory { NasaRemoteDataSource(api = get()) }`, `single { SearchCache() }` y `single<NasaImageRepository> { NasaImageRepositoryImpl(remoteDataSource = get(), cache = get()) }`.
 
 ## Tests (`src/test`)
 

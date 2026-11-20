@@ -43,8 +43,9 @@ Si una implementación te obliga a romper esta regla, el diseño está mal: repl
 
 Cada capa tiene su módulo en su paquete `di/`: `domainModule`, `dataModule` (que incluye `networkModule`) y `uiModule`. `app/di/AppModules.kt` los junta en `appModules`, e `IberiaApplication` llama a `startKoin`.
 
-- **Constructor DSL** (`factoryOf`, `singleOf`, `viewModelOf`) cuando todos los parámetros son dependencias registradas.
-- **Lambda** (`factory { }`, `single { }`, `viewModel { }`) cuando hay valores por defecto que deben respetarse (`Dispatchers.IO`, `Random.Default`) o parámetros en tiempo de ejecución (`parametersOf`).
+- **Siempre lambda con argumentos con nombre:** `factory { X(repository = get()) }`, `single { ... }` y `viewModel { ... }`, de modo que se vea qué recibe cada clase. **No uses** el constructor DSL (`factoryOf`, `singleOf`, `viewModelOf`).
+- **Valores por defecto** (`Dispatchers.IO`, `Random.Default`): no se pasan en la lambda, así se usa el del constructor.
+- **Parámetros en tiempo de ejecución** con `parametersOf`, recogidos con `params ->`: `viewModel { params -> DetailViewModel(nasaId = params.get(), getImage = get()) }`.
 - **Test del grafo:** `app/src/test/.../di/AppModulesTest.kt` verifica todo el grafo con `verify()`. Si añades una definición con un tipo que Koin no puede resolver (por ejemplo, un `String` que llega por parámetros), añádelo a `extraTypes`.
 
 ## Cómo añadir una funcionalidad nueva
