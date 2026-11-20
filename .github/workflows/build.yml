@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    name: Assemble debug and release
+    name: Assemble and lint
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -33,3 +33,6 @@ jobs:
 
       - name: Assemble
         run: ./gradlew assembleDebug assembleRelease --stacktrace
+
+      - name: Lint
+        run: ./gradlew lintDebug --stacktrace

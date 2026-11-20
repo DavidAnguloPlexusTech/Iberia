@@ -22,5 +22,5 @@ Recibirás una respuesta lo antes posible. Si se confirma, se publicará una ver
 ## Medidas activas en el repositorio
 
 - **Dependabot:** alertas de dependencias vulnerables, actualizaciones de seguridad automáticas y actualizaciones de versión semanales de Gradle y GitHub Actions.
-- **Code scanning con CodeQL:** análisis de Kotlin y de los workflows en cada push y pull request.
+- **Code scanning con CodeQL:** default setup de GitHub (sin workflow propio en el repositorio), con análisis de Kotlin y de los workflows en cada push y pull request.
 - **Secret scanning** con protección en el push.
