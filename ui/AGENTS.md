@@ -50,8 +50,8 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 
 `HomeViewModel` es la pieza con más lógica:
 
-- **Búsqueda:** `queries` (`MutableStateFlow`) → `debounce(SEARCH_DEBOUNCE)` (400 ms) → `trim` → `distinctUntilChanged` → `searchFirstPage`.
-- **Cancelación:** cada carga se lanza en `loadJob`, y antes de una nueva se hace `loadJob?.cancel()`. Así una búsqueda vieja nunca sobrescribe a una nueva. Mantén este patrón en cualquier carga nueva.
+- **Búsqueda:** `queries` (`MutableStateFlow`) → `debounce(SEARCH_DEBOUNCE)` (400 ms) → `trim` → `onQuerySettled`, que solo busca si el texto cambió o si la búsqueda anterior se canceló.
+- **Cancelación:** cada carga se lanza en `loadJob`. `onQueryChange` la cancela en cuanto el texto cambia, sin esperar al debounce, y `load()` la cancela antes de cada carga nueva. Así una búsqueda vieja nunca llega a mostrarse. Mantén este patrón en cualquier carga nueva.
 - **Dos fuentes, un solo camino:** con texto se usa `SearchImagesUseCase` y sin texto el feed aleatorio (`GetRandomImagesUseCase`), las dos con la misma paginación.
 - **Paginación:** la lista (`ImageList`) observa el scroll con `snapshotFlow` y llama a `loadNextPage()` cuando faltan 5 elementos. El ViewModel ignora la llamada si `canLoadNextPage` es falso. Al añadir páginas se eliminan ids repetidos, porque `LazyColumn` usa el id como clave.
 

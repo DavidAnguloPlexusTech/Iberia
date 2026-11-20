@@ -110,6 +110,53 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun `an old search that answers while the new query waits for the debounce is not shown`() = runTest {
+        givenSearchAnswersAfter("apollo", 200.milliseconds)
+        givenSearchAnswersAfter("mars", Duration.ZERO)
+
+        viewModel.onQueryChange("apollo")
+        advanceTimeBy(SEARCH_DEBOUNCE + 1.milliseconds)
+        runCurrent()
+        viewModel.onQueryChange("mars")
+        advanceTimeBy(300.milliseconds)
+        runCurrent()
+
+        assertNotEquals(pageOf("apollo").images, viewModel.state.value.images)
+        advanceUntilIdle()
+        assertEquals(pageOf("mars").images, viewModel.state.value.images)
+    }
+
+    @Test
+    fun `going back to the same query before the debounce loads it instead of waiting forever`() = runTest {
+        givenSearchAnswersAfter("apollo", 200.milliseconds)
+        givenSearchAnswersAfter("mars", Duration.ZERO)
+
+        viewModel.onQueryChange("apollo")
+        advanceTimeBy(SEARCH_DEBOUNCE + 1.milliseconds)
+        runCurrent()
+        viewModel.onQueryChange("mars")
+        advanceTimeBy(100.milliseconds)
+        viewModel.onQueryChange("apollo")
+        advanceUntilIdle()
+
+        assertEquals(pageOf("apollo").images, viewModel.state.value.images)
+        assertFalse(viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun `adding a trailing space keeps the loaded pages`() = runTest {
+        searchFor("apollo")
+        viewModel.loadNextPage()
+        advanceUntilIdle()
+
+        viewModel.onQueryChange("apollo ")
+        advanceUntilIdle()
+
+        assertEquals(2, viewModel.state.value.page)
+        assertEquals(listOf("apollo" to 1, "apollo" to 2), searches())
+    }
+
+    @Test
     fun `shows loading while the first page is requested`() = runTest {
         responseDelay = 1.seconds
         viewModel.onQueryChange("apollo")
@@ -246,4 +293,13 @@ class HomeViewModelTest {
             .map { it.getArgument<String>(0) to it.getArgument<Int>(1) }
 
     private fun pageOf(query: String) = SearchPage(images = listOf(image("$query-1")), hasNextPage = false)
+
+    private fun givenSearchAnswersAfter(query: String, responseTime: Duration) {
+        whenever(repository.search(eq(query), any())).thenAnswer {
+            flow {
+                delay(responseTime)
+                emit(Result.success(pageOf(query)))
+            }
+        }
+    }
 }

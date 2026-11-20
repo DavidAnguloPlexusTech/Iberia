@@ -172,12 +172,12 @@ Los componentes reutilizables viven cada uno en su propio archivo, en `component
 
 Se resuelve en varias capas:
 
-1. **Debounce.** `HomeViewModel` espera 400 ms sin cambios antes de buscar (`debounce`) e ignora textos repetidos (`distinctUntilChanged`). Escribir "apollo" letra a letra lanza **una** búsqueda, no seis.
-2. **Cancelación explícita.** Cada carga se lanza en un `Job` (`loadJob`). Antes de empezar una nueva, el anterior se cancela con `loadJob?.cancel()`. Así, los resultados de una búsqueda vieja **nunca pueden sobrescribir** los de una más nueva, aunque la vieja responda después.
+1. **Debounce.** `HomeViewModel` espera 400 ms sin cambios antes de buscar (`debounce`). Escribir "apollo" letra a letra lanza **una** búsqueda, no seis, y añadir o quitar espacios no repite la búsqueda ni reinicia la lista.
+2. **Cancelación explícita.** Cada carga se lanza en un `Job` (`loadJob`). La petición en curso se cancela **en cuanto cambia el texto**, sin esperar al debounce, y también antes de empezar cualquier carga nueva. Así, los resultados de una búsqueda vieja **nunca llegan a mostrarse**, ni siquiera durante los 400 ms en que la nueva espera. Si vuelves al mismo texto antes de que se lance, la búsqueda cancelada se repite.
 3. **La cancelación llega hasta la red.** Las llamadas de Retrofit son funciones `suspend` y se cancelan junto con la corrutina. `apiCall` relanza la `CancellationException` en lugar de convertirla en un error, para no romper ese mecanismo.
 4. **Ámbito.** Todo corre en `viewModelScope`: si el usuario sale de la pantalla, cualquier petición en curso se cancela sola.
 
-Lo comprueba `HomeViewModelTest`: lanza una búsqueda lenta, escribe otra antes de que responda y verifica que la primera nunca llega a terminar y que solo se muestran los resultados de la segunda.
+Lo comprueba `HomeViewModelTest`: una búsqueda lenta que se sustituye nunca llega a terminar, una búsqueda vieja que responde mientras la nueva espera el debounce no se muestra, y volver al mismo texto antes del debounce vuelve a cargar en lugar de quedarse esperando.
 
 ### 5.2 Caché
 
@@ -245,7 +245,7 @@ Gson, con DTOs `internal`, todos los campos nullables (Gson no respeta la null-s
 
 ## 6. Tests
 
-**85 tests unitarios** y **27 tests de UI**. Los unitarios usan **Mockito** (con `mockito-kotlin`) para simular el repositorio en domain y presentación, **kotlinx-coroutines-test** para las corrutinas con tiempo virtual, y **MockWebServer** para probar la red real en data.
+**88 tests unitarios** y **27 tests de UI**. Los unitarios usan **Mockito** (con `mockito-kotlin`) para simular el repositorio en domain y presentación, **kotlinx-coroutines-test** para las corrutinas con tiempo virtual, y **MockWebServer** para probar la red real en data.
 
 ### Domain: casos de uso con repositorios simulados
 
@@ -269,7 +269,7 @@ Gson, con DTOs `internal`, todos los campos nullables (Gson no respeta la null-s
 
 | Clase | Qué comprueba |
 |---|---|
-| `HomeViewModelTest` (16) | **Cancelación**: una búsqueda nueva cancela la que está en curso y solo se muestran sus resultados. También debounce (solo se busca la última consulta al escribir rápido), estado de carga, errores, reintentos, paginación, feed aleatorio y navegación. |
+| `HomeViewModelTest` (19) | **Cancelación**: una búsqueda nueva cancela la que está en curso y solo se muestran sus resultados. También debounce (solo se busca la última consulta al escribir rápido), estado de carga, errores, reintentos, paginación, feed aleatorio y navegación. |
 | `DetailViewModelTest` (6) | Pide la imagen de su id, carga, error, reintento y volver atrás. |
 | `SplashViewModelTest` (1), `DateFormattingTest` (3) | Navegación desde la Splash y formato de fechas. |
 | `AppModulesTest` (1) | Grafo de Koin completo. |
