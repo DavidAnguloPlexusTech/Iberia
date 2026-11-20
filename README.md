@@ -71,7 +71,7 @@ Cada pantalla se compone de dos archivos:
 
 - `XViewModel.kt` contiene:
   - el estado inmutable (`XState`), expuesto como `StateFlow` y actualizado con `update { it.copy(...) }`;
-  - los eventos de navegación (`XEvent`), expuestos como `SharedFlow`;
+  - los eventos de navegación (`XEvent`), enviados por un `Channel` con buffer y expuestos como `Flow`, para que no se pierdan si no hay colector activo;
   - una función pública por acción de usuario.
 - `XScreen.kt` contiene:
   - `XRoute`, que resuelve el ViewModel, recoge estado y eventos con conciencia del ciclo de vida y navega;
@@ -82,7 +82,7 @@ Cada pantalla se compone de dos archivos:
 ### Cancelación de búsquedas
 
 - **Debounce:** `HomeViewModel` aplica `debounce` de 400 ms y normaliza la consulta con `trim`.
-- **Cancelación inmediata:** cada carga se ejecuta en un `Job` que se cancela en cuanto cambia el texto, sin esperar al debounce, y antes de iniciar cualquier carga nueva. Así ningún resultado obsoleto llega a la UI.
+- **Cancelación inmediata:** cada carga se ejecuta en un `Job` que se cancela en cuanto cambia el texto, sin esperar al debounce, y antes de iniciar cualquier carga nueva. En ese mismo momento la lista se vacía y se muestra el estado de carga, así que nunca se ven resultados de una consulta anterior junto al texto nuevo.
 - **Propagación a la red:** las llamadas de Retrofit son `suspend` y se cancelan con la corrutina. `apiCall` relanza `CancellationException` en lugar de convertirla en error.
 - **Ámbito:** todas las cargas se ejecutan en `viewModelScope`.
 
@@ -130,7 +130,7 @@ Detalles de `SearchCache`:
 
 ## Tests
 
-### Unitarios: 88 tests, JUnit 5
+### Unitarios: 92 tests, JUnit 5
 
 Herramientas: Mockito + mockito-kotlin, kotlinx-coroutines-test, Turbine y MockWebServer.
 
@@ -138,7 +138,7 @@ Herramientas: Mockito + mockito-kotlin, kotlinx-coroutines-test, Turbine y MockW
 |---|---|---|
 | `domain` | 10 | Casos de uso contra un repositorio simulado. |
 | `data` | 48 | Ver detalle debajo. |
-| `ui` / `app` | 30 | Ver detalle debajo. |
+| `ui` / `app` | 34 | Ver detalle debajo. |
 
 En `data`:
 
@@ -148,7 +148,8 @@ En `data`:
 
 En `ui` / `app`:
 
-- **`HomeViewModelTest`:** cancelación, debounce, paginación, feed aleatorio, errores, reintento y navegación.
+- **`HomeViewModelTest`:** cancelación, resultados ocultos durante el debounce, paginación, feed aleatorio, errores, reintento y navegación.
+- **Eventos:** en los tres ViewModels, un evento enviado sin colector llega al empezar a colectar.
 - **Resto de pantallas y utilidades:** `DetailViewModel` y `SplashViewModel`, el formateo de fechas y el grafo de Koin.
 
 ### Instrumentados: 27 tests, JUnit 4
@@ -167,7 +168,7 @@ GitHub Actions (`.github/workflows/`):
 
 | Workflow | Descripción |
 |---|---|
-| `build.yml` | Compila debug y release (con R8) |
+| `build.yml` | Compila debug y release (con R8) y ejecuta Android Lint |
 | `tests.yml` | Ejecuta los tests unitarios y publica los informes como artefacto |
 
 - **Disparadores:** push a `main`, `develop`, `feature/**`, `fix/**` y `release/**`, y pull requests a `main` y `develop`.
@@ -175,7 +176,7 @@ GitHub Actions (`.github/workflows/`):
 - **Concurrencia:** cancela las ejecuciones previas de la misma rama.
 - **Seguridad:**
   - Dependabot: alertas y actualizaciones semanales de Gradle y Actions.
-  - CodeQL y secret scanning.
+  - CodeQL (default setup de GitHub, Kotlin y workflows) y secret scanning.
   - Política de reporte de vulnerabilidades en [`SECURITY.md`](SECURITY.md).
 
 ## Accesibilidad

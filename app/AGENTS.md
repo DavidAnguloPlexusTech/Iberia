@@ -89,7 +89,7 @@ Tests de UI de accesibilidad (necesitan un emulador o dispositivo conectado):
 
 En `.github/workflows/`:
 
-- **`build.yml`** compila debug y release.
+- **`build.yml`** compila debug y release y ejecuta `lintDebug`.
 - **`tests.yml`** ejecuta los tests unitarios y sube los informes.
 
 Se lanzan en cada push a `main`, `develop`, `feature/**`, `fix/**` y `release/**`, y en los pull requests hacia `main` y `develop`. No dejes una rama con la CI en rojo.
