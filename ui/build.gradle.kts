@@ -29,6 +29,7 @@ android {
 
     testOptions {
         unitTests.all { test ->
+            test.useJUnitPlatform()
             val mockitoAgentJar = files(mockitoAgent)
             test.jvmArgumentProviders.add(
                 CommandLineArgumentProvider { listOf("-javaagent:${mockitoAgentJar.singleFile.absolutePath}") },
@@ -56,7 +57,9 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.androidx.compose)
 
-    testImplementation(libs.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.mockito.core)

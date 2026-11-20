@@ -50,8 +50,8 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 
 `HomeViewModel` es la pieza con más lógica:
 
-- **Búsqueda:** `queries` (`MutableStateFlow`) → `debounce(SEARCH_DEBOUNCE)` (400 ms) → `trim` → `distinctUntilChanged` → `searchFirstPage`.
-- **Cancelación:** cada carga se lanza en `loadJob`, y antes de una nueva se hace `loadJob?.cancel()`. Así una búsqueda vieja nunca sobrescribe a una nueva. Mantén este patrón en cualquier carga nueva.
+- **Búsqueda:** `queries` (`MutableStateFlow`) → `debounce(SEARCH_DEBOUNCE)` (400 ms) → `trim` → `onQuerySettled`, que solo busca si el texto cambió o si la búsqueda anterior se canceló.
+- **Cancelación:** cada carga se lanza en `loadJob`. `onQueryChange` la cancela en cuanto el texto cambia, sin esperar al debounce, y `load()` la cancela antes de cada carga nueva. Así una búsqueda vieja nunca llega a mostrarse. Mantén este patrón en cualquier carga nueva.
 - **Dos fuentes, un solo camino:** con texto se usa `SearchImagesUseCase` y sin texto el feed aleatorio (`GetRandomImagesUseCase`), las dos con la misma paginación.
 - **Paginación:** la lista (`ImageList`) observa el scroll con `snapshotFlow` y llama a `loadNextPage()` cuando faltan 5 elementos. El ViewModel ignora la llamada si `canLoadNextPage` es falso. Al añadir páginas se eliminan ids repetidos, porque `LazyColumn` usa el id como clave.
 
@@ -94,12 +94,12 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 
 **Unitarios (`src/test`): ViewModels**
 
-- **`MainDispatcherRule`** sustituye `Dispatchers.Main` por un `StandardTestDispatcher`.
+- **JUnit 5 (Jupiter).** La extensión **`MainDispatcherExtension`** (`@JvmField @RegisterExtension`) sustituye `Dispatchers.Main` por un `StandardTestDispatcher`.
 - **Tiempo virtual:** `advanceTimeBy(SEARCH_DEBOUNCE)` y `advanceUntilIdle()`.
 - **Eventos:** con Turbine (`events.test { ... awaitItem() }`).
 - **Mockito:**
   - El repositorio se simula con `mock()`.
-  - En `@Before`, `whenever(...).thenAnswer { flow { delay(...); emit(...) } }` simula resultados por página y retrasos, con variables del test (`searchResults`, `responseDelay`, `imageResult`).
+  - En `@BeforeEach`, `whenever(...).thenAnswer { flow { delay(...); emit(...) } }` simula resultados por página y retrasos, con variables del test (`searchResults`, `responseDelay`, `imageResult`).
   - Las búsquedas realizadas se leen con `mockingDetails(repository).invocations` (helper `searches()` en `HomeViewModelTest`), y las llamadas concretas se comprueban con `verify`.
 - **Datos de ejemplo:** `image()` y `searchPage()` están en `TestData.kt`.
 - **Ojo:** los ViewModels se crean con `by lazy`; tócalos (`viewModel`) antes de avanzar el tiempo si el test depende de su `init`.
@@ -108,7 +108,7 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 ./gradlew :ui:testDebugUnitTest
 ```
 
-**UI de accesibilidad (`src/androidTest/.../accessibility/`), en emulador o dispositivo:**
+**UI de accesibilidad (`src/androidTest/.../accessibility/`), en emulador o dispositivo, con JUnit 4** (lo exigen `createComposeRule` y `AndroidJUnitRunner`)**:**
 
 - **`TalkBackTest`:** semántica para TalkBack.
 - **`FontScalingTest`:** con `DeviceConfigurationOverride.FontScale(2f)`.

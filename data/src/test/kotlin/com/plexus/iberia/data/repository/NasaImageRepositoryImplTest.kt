@@ -11,10 +11,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import kotlin.time.TestTimeSource
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -28,7 +28,7 @@ class NasaImageRepositoryImplTest {
         ioDispatcher = UnconfinedTestDispatcher(),
     )
 
-    @After
+    @AfterEach
     fun tearDown() = server.close()
 
     @Test

@@ -20,6 +20,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    testOptions {
+        unitTests.all { test -> test.useJUnitPlatform() }
+    }
+
     buildFeatures {
         buildConfig = true
     }
@@ -37,7 +41,9 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
 
-    testImplementation(libs.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver3)
 }

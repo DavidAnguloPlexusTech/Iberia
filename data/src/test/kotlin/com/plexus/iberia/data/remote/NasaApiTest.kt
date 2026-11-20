@@ -5,16 +5,16 @@ import com.plexus.iberia.data.readResource
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class NasaApiTest {
 
     private val server = MockWebServer().apply { start() }
     private val api = server.createNasaApi()
 
-    @After
+    @AfterEach
     fun tearDown() = server.close()
 
     @Test

@@ -5,7 +5,7 @@ import com.plexus.iberia.domain.error.DomainError
 import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.repository.NasaImageRepository
 import com.plexus.iberia.domain.usecase.GetImageUseCase
-import com.plexus.iberia.ui.MainDispatcherRule
+import com.plexus.iberia.ui.MainDispatcherExtension
 import com.plexus.iberia.ui.image
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -28,15 +28,16 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModelTest {
 
-    @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    @JvmField
+    @RegisterExtension
+    val mainDispatcherExtension = MainDispatcherExtension()
 
     private val repository: NasaImageRepository = mock()
     private var imageResult: Result<NasaImage> = Result.success(image("id"))
     private var responseDelay: Duration = Duration.ZERO
     private val viewModel by lazy { DetailViewModel(nasaId = "GRC-1", getImage = GetImageUseCase(repository)) }
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(repository.getImage(any())).thenAnswer {
             flow {

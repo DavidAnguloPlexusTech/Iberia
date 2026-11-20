@@ -6,7 +6,7 @@ import com.plexus.iberia.domain.model.SearchPage
 import com.plexus.iberia.domain.repository.NasaImageRepository
 import com.plexus.iberia.domain.usecase.GetRandomImagesUseCase
 import com.plexus.iberia.domain.usecase.SearchImagesUseCase
-import com.plexus.iberia.ui.MainDispatcherRule
+import com.plexus.iberia.ui.MainDispatcherExtension
 import com.plexus.iberia.ui.home.HomeViewModel.Companion.SEARCH_DEBOUNCE
 import com.plexus.iberia.ui.image
 import com.plexus.iberia.ui.searchPage
@@ -22,13 +22,13 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -38,8 +38,9 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
 
-    @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    @JvmField
+    @RegisterExtension
+    val mainDispatcherExtension = MainDispatcherExtension()
 
     private val repository: NasaImageRepository = mock()
     private var searchResults: (page: Int) -> Result<SearchPage> = { Result.success(searchPage(it)) }
@@ -48,7 +49,7 @@ class HomeViewModelTest {
         HomeViewModel(SearchImagesUseCase(repository), GetRandomImagesUseCase(repository, Random(0)))
     }
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(repository.search(any(), any())).thenAnswer { invocation ->
             val page = invocation.getArgument<Int>(1)
@@ -107,6 +108,53 @@ class HomeViewModelTest {
 
         assertEquals(pageOf("mars").images, viewModel.state.value.images)
         assertFalse(oldSearchFinished)
+    }
+
+    @Test
+    fun `an old search that answers while the new query waits for the debounce is not shown`() = runTest {
+        givenSearchAnswersAfter("apollo", 200.milliseconds)
+        givenSearchAnswersAfter("mars", Duration.ZERO)
+
+        viewModel.onQueryChange("apollo")
+        advanceTimeBy(SEARCH_DEBOUNCE + 1.milliseconds)
+        runCurrent()
+        viewModel.onQueryChange("mars")
+        advanceTimeBy(300.milliseconds)
+        runCurrent()
+
+        assertNotEquals(pageOf("apollo").images, viewModel.state.value.images)
+        advanceUntilIdle()
+        assertEquals(pageOf("mars").images, viewModel.state.value.images)
+    }
+
+    @Test
+    fun `going back to the same query before the debounce loads it instead of waiting forever`() = runTest {
+        givenSearchAnswersAfter("apollo", 200.milliseconds)
+        givenSearchAnswersAfter("mars", Duration.ZERO)
+
+        viewModel.onQueryChange("apollo")
+        advanceTimeBy(SEARCH_DEBOUNCE + 1.milliseconds)
+        runCurrent()
+        viewModel.onQueryChange("mars")
+        advanceTimeBy(100.milliseconds)
+        viewModel.onQueryChange("apollo")
+        advanceUntilIdle()
+
+        assertEquals(pageOf("apollo").images, viewModel.state.value.images)
+        assertFalse(viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun `adding a trailing space keeps the loaded pages`() = runTest {
+        searchFor("apollo")
+        viewModel.loadNextPage()
+        advanceUntilIdle()
+
+        viewModel.onQueryChange("apollo ")
+        advanceUntilIdle()
+
+        assertEquals(2, viewModel.state.value.page)
+        assertEquals(listOf("apollo" to 1, "apollo" to 2), searches())
     }
 
     @Test
@@ -246,4 +294,13 @@ class HomeViewModelTest {
             .map { it.getArgument<String>(0) to it.getArgument<Int>(1) }
 
     private fun pageOf(query: String) = SearchPage(images = listOf(image("$query-1")), hasNextPage = false)
+
+    private fun givenSearchAnswersAfter(query: String, responseTime: Duration) {
+        whenever(repository.search(eq(query), any())).thenAnswer {
+            flow {
+                delay(responseTime)
+                emit(Result.success(pageOf(query)))
+            }
+        }
+    }
 }

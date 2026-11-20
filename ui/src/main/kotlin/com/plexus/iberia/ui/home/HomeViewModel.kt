@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -61,7 +60,7 @@ internal class HomeViewModel(
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
     private val queries = MutableStateFlow("")
-    private var searchedQuery = ""
+    private var searchedQuery: String? = null
     private var randomFeed = getRandomImages.newFeed()
     private var loadJob: Job? = null
 
@@ -71,6 +70,7 @@ internal class HomeViewModel(
 
     fun onQueryChange(query: String) {
         _state.update { it.copy(query = query) }
+        if (query.trim() != searchedQuery) loadJob?.cancel()
         queries.value = query
     }
 
@@ -82,7 +82,7 @@ internal class HomeViewModel(
 
     fun retry() {
         if (_state.value.images.isEmpty()) {
-            searchFirstPage(searchedQuery)
+            searchFirstPage(searchedQuery.orEmpty())
         } else {
             _state.update { it.copy(error = null) }
             loadNextPage()
@@ -98,9 +98,13 @@ internal class HomeViewModel(
         queries
             .debounce(SEARCH_DEBOUNCE)
             .map { it.trim() }
-            .distinctUntilChanged()
-            .onEach(::searchFirstPage)
+            .onEach(::onQuerySettled)
             .launchIn(viewModelScope)
+    }
+
+    private fun onQuerySettled(query: String) {
+        val alreadyShown = query == searchedQuery && loadJob?.isCancelled == false
+        if (!alreadyShown) searchFirstPage(query)
     }
 
     private fun searchFirstPage(query: String) {
@@ -117,8 +121,10 @@ internal class HomeViewModel(
             .launchIn(viewModelScope)
     }
 
-    private fun pageFlow(page: Int): Flow<Result<SearchPage>> =
-        if (searchedQuery.isEmpty()) getRandomImages(randomFeed, page) else searchImages(searchedQuery, page)
+    private fun pageFlow(page: Int): Flow<Result<SearchPage>> {
+        val query = searchedQuery.orEmpty()
+        return if (query.isEmpty()) getRandomImages(randomFeed, page) else searchImages(query, page)
+    }
 
     private fun onPageResult(result: Result<SearchPage>, page: Int) {
         result.fold(
