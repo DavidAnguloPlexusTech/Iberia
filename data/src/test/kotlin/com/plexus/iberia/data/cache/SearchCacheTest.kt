@@ -2,9 +2,9 @@ package com.plexus.iberia.data.cache
 
 import com.plexus.iberia.domain.model.NasaImage
 import com.plexus.iberia.domain.model.SearchPage
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TestTimeSource

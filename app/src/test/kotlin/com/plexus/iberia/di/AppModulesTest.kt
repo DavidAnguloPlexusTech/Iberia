@@ -1,6 +1,6 @@
 package com.plexus.iberia.di
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.module
 import org.koin.test.verify.verify

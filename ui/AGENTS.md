@@ -94,12 +94,12 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 
 **Unitarios (`src/test`): ViewModels**
 
-- **`MainDispatcherRule`** sustituye `Dispatchers.Main` por un `StandardTestDispatcher`.
+- **JUnit 5 (Jupiter).** La extensión **`MainDispatcherExtension`** (`@JvmField @RegisterExtension`) sustituye `Dispatchers.Main` por un `StandardTestDispatcher`.
 - **Tiempo virtual:** `advanceTimeBy(SEARCH_DEBOUNCE)` y `advanceUntilIdle()`.
 - **Eventos:** con Turbine (`events.test { ... awaitItem() }`).
 - **Mockito:**
   - El repositorio se simula con `mock()`.
-  - En `@Before`, `whenever(...).thenAnswer { flow { delay(...); emit(...) } }` simula resultados por página y retrasos, con variables del test (`searchResults`, `responseDelay`, `imageResult`).
+  - En `@BeforeEach`, `whenever(...).thenAnswer { flow { delay(...); emit(...) } }` simula resultados por página y retrasos, con variables del test (`searchResults`, `responseDelay`, `imageResult`).
   - Las búsquedas realizadas se leen con `mockingDetails(repository).invocations` (helper `searches()` en `HomeViewModelTest`), y las llamadas concretas se comprueban con `verify`.
 - **Datos de ejemplo:** `image()` y `searchPage()` están en `TestData.kt`.
 - **Ojo:** los ViewModels se crean con `by lazy`; tócalos (`viewModel`) antes de avanzar el tiempo si el test depende de su `init`.
@@ -108,7 +108,7 @@ Los parámetros de navegación (como `nasaId` en Detail) llegan al ViewModel por
 ./gradlew :ui:testDebugUnitTest
 ```
 
-**UI de accesibilidad (`src/androidTest/.../accessibility/`), en emulador o dispositivo:**
+**UI de accesibilidad (`src/androidTest/.../accessibility/`), en emulador o dispositivo, con JUnit 4** (lo exigen `createComposeRule` y `AndroidJUnitRunner`)**:**
 
 - **`TalkBackTest`:** semántica para TalkBack.
 - **`FontScalingTest`:** con `DeviceConfigurationOverride.FontScale(2f)`.

@@ -5,9 +5,9 @@ import com.plexus.iberia.domain.repository.NasaImageRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -19,7 +19,7 @@ class SearchImagesUseCaseTest {
     private val searchImages = SearchImagesUseCase(repository)
     private val page = SearchPage(images = emptyList(), hasNextPage = false)
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(repository.search(any(), any())).thenReturn(flowOf(Result.success(page)))
     }

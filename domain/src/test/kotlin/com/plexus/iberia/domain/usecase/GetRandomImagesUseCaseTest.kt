@@ -6,11 +6,11 @@ import com.plexus.iberia.domain.repository.NasaImageRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
@@ -24,7 +24,7 @@ class GetRandomImagesUseCaseTest {
     private val getRandomImages = GetRandomImagesUseCase(repository)
     private val feed = RandomFeed(topics = listOf("mars", "moon", "sun"), firstPage = 7)
 
-    @Before
+    @BeforeEach
     fun setUp() {
         givenRepositoryPage(hasNextPage = true)
     }

@@ -3,9 +3,10 @@ package com.plexus.iberia.data.remote
 import com.plexus.iberia.domain.error.DomainError
 import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
@@ -35,9 +36,11 @@ class ApiCallTest {
         assertTrue(failureOf { throw IllegalStateException() } is DomainError.Unknown)
     }
 
-    @Test(expected = CancellationException::class)
-    fun `does not swallow cancellation`() = runTest {
-        apiCall { throw CancellationException() }
+    @Test
+    fun `does not swallow cancellation`() {
+        assertThrows<CancellationException> {
+            runTest { apiCall { throw CancellationException() } }
+        }
     }
 
     private suspend fun failureOf(block: suspend () -> Unit): Throwable? =

@@ -31,6 +31,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    testOptions {
+        unitTests.all { test -> test.useJUnitPlatform() }
+    }
+
     buildFeatures {
         compose = true
     }
@@ -51,6 +55,8 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.koin.test.junit4)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.koin.test)
 }

@@ -48,7 +48,7 @@ di/           domainModule
 
 ## Tests (`src/test`)
 
-- **JUnit 4 + `kotlinx-coroutines-test`** (`runTest`). Los Flow se leen con `.first()`.
+- **JUnit 5 (Jupiter) + `kotlinx-coroutines-test`** (`runTest`). Los Flow se leen con `.first()`.
 - **Mockito con `mockito-kotlin`:**
   - Se simula el repositorio con `private val repository: NasaImageRepository = mock()`.
   - Las respuestas se configuran con `whenever(repository.search(any(), any())).thenReturn(flowOf(...))`.
