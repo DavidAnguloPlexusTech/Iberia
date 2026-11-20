@@ -296,6 +296,7 @@ Dos workflows de **GitHub Actions** en `.github/workflows/`:
 - **Cuándo se ejecutan:** en cada push a `main`, `develop`, `feature/**`, `fix/**` y `release/**`, y en los pull requests hacia `main` y `develop`.
 - **Entorno:** JDK 25 (Temurin), con caché de Gradle y validación del wrapper.
 - **Ejecuciones duplicadas:** un push nuevo a la misma rama cancela la ejecución anterior.
+- **Seguridad:** Dependabot (alertas, actualizaciones de seguridad y actualizaciones semanales de Gradle y Actions), code scanning con CodeQL y secret scanning. Las vulnerabilidades se reportan en privado según [`SECURITY.md`](SECURITY.md).
 
 ---
 
