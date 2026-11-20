@@ -23,7 +23,9 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
 
-    testImplementation(libs.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
@@ -31,6 +33,7 @@ dependencies {
 }
 
 tasks.test {
+    useJUnitPlatform()
     val mockitoAgentJar = files(mockitoAgent)
     jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-javaagent:${mockitoAgentJar.singleFile.absolutePath}") })
 }
